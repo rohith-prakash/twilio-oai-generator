@@ -122,11 +122,7 @@ public class {{resourceName}} extends Resource {
             throw new ApiConnectionException(e.getMessage(), e);
         }
     }
-{{#operations}}
-{{#vendorExtensions.x-is-fetch-operation}}
 {{>responseModel}}
-{{/vendorExtensions.x-is-fetch-operation}}
-{{/operations}}
 }
 {{/resources}}
 

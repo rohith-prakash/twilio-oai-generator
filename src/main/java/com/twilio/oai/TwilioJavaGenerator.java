@@ -142,7 +142,8 @@ public class TwilioJavaGenerator extends JavaClientCodegen {
 
         final Map<String, Object> ops = getStringMap(results, "operations");
         final ArrayList<CodegenOperation> opList = (ArrayList<CodegenOperation>) ops.get("operation");
-
+        String recordKey = getRecordKey(opList, this.allModels);
+        List<CodegenModel> responseModels = new ArrayList<CodegenModel>();
         // iterate over the operation and perhaps modify something
         for (final CodegenOperation co : opList) {
             // Group operations by resource.
@@ -156,7 +157,6 @@ public class TwilioJavaGenerator extends JavaClientCodegen {
                 if ("GET".equalsIgnoreCase(co.httpMethod)) {
                     resource.put("hasFetch", true);
                     resource.put("requiredParamsFetch", co.requiredParams);
-
                     co.vendorExtensions.put("x-is-fetch-operation", true);
                     addOperationName(co, "Fetch");
                 } else if ("POST".equalsIgnoreCase(co.httpMethod)) {
@@ -199,38 +199,72 @@ public class TwilioJavaGenerator extends JavaClientCodegen {
             co.hasParams = !co.allParams.isEmpty();
             co.allParams = co.allParams.stream().map(ConventionResolver::resolveParamTypes).collect(Collectors.toList());
             co.hasRequiredParams = !co.requiredParams.isEmpty();
-
             if (co.bodyParam != null) {
                 addModel(resource, co.bodyParam.dataType);
             }
             co.responses
-              .stream()
-              .map(response -> response.dataType)
-              .filter(Objects::nonNull)
-              .map(this::getModel)
-              .map(ConventionResolver::resolve)
-              .map(item -> ConventionResolver.resolveComplexType(item, modelFormatMap))
-              .flatMap(Optional::stream)
-              .forEach(model -> {
-                  if (co.path.endsWith("}") || co.path.endsWith("}.json")) {
-                      resource.put("responseModel", model);
-                  }
-                  resource.put("serialVersionUID", calculateSerialVersionUid(model.vars));
-              });
+            .stream()
+            .map(response -> response.dataType)
+            .filter(Objects::nonNull)
+            .map(modelName -> this.getModelCoPath(modelName, co, recordKey))
+            .map(ConventionResolver::resolve)
+            .map(item -> ConventionResolver.resolveComplexType(item, modelFormatMap))
+            .flatMap(Optional::stream)
+            .forEach(model -> {
+                responseModels.add(model);
+                resource.put("serialVersionUID", calculateSerialVersionUid(model.vars));
+            });
 
+            results.put("recordKey", recordKey);
             results.put("apiFilename", getResourceName(co.path));
             results.put("packageName", getPackageName(co.path));
             results.put("recordKey", getFolderName(co.path).toLowerCase(Locale.ROOT));
             resource.put("packageSubPart", getPackageName(co.path).substring(0, getPackageName(co.path).lastIndexOf(".")));
         }
 
-        for (final Object resource : resources.values()) {
-            flattenStringMap((Map<String, Object>) resource, "models");
+        for (final Map<String, Object> resource : resources.values()) {
+            resource.put("responseModel", getConcatenatedResponseModel(responseModels));
+            flattenStringMap(resource, "models");
         }
 
         results.put("resources", resources.values());
 
         return results;
+    }
+
+    private CodegenModel getConcatenatedResponseModel(List<CodegenModel> responseModels) {
+        CodegenModel codegenModel = new CodegenModel();
+        List<CodegenProperty> codegenProperties = new ArrayList<>();
+        for (CodegenModel resModel : responseModels) {
+            for (CodegenProperty modelProp : resModel.vars) {
+                boolean contains = false;
+                for (CodegenProperty property : codegenProperties) {
+                    if (property.baseName.equals(modelProp.baseName)) {
+                        contains = true;
+                    }
+                }
+                if (!contains) {
+                    codegenProperties.add(modelProp);
+                }
+            }
+        }
+        codegenModel.setVars(codegenProperties);
+        return codegenModel;
+    }
+
+    private String getRecordKey(List<CodegenOperation> opList, List<CodegenModel> models) {
+        String recordKey =  "";
+        for (CodegenOperation co: opList) {
+            for(CodegenModel model: models) {
+                if(model.name.equals(co.returnType)) {
+                    recordKey = model.allVars
+                            .stream()
+                            .filter(v -> v.openApiType.equals("array"))
+                            .collect(Collectors.toList()).get(0).baseName;
+                }
+            }
+        }
+        return recordKey;
     }
 
     @AllArgsConstructor
@@ -268,6 +302,19 @@ public class TwilioJavaGenerator extends JavaClientCodegen {
     }
 
     private Optional<CodegenModel> getModel(final String modelName) {
+        return allModels.stream().filter(model -> model.getClassname().equals(modelName)).findFirst();
+    }
+
+    private Optional<CodegenModel> getModelCoPath(final String modelName, CodegenOperation codegenOperation, String recordKey) {
+        if (codegenOperation.vendorExtensions.containsKey("x-is-read-operation") && (boolean)codegenOperation.vendorExtensions.get("x-is-read-operation")) {
+            Optional<CodegenModel> coModel = allModels.stream().filter(model -> model.getClassname().equals(modelName)).findFirst();
+            if (!coModel.isPresent()) {
+                return Optional.empty();
+            }
+            CodegenProperty property = coModel.get().vars.stream().filter(prop -> prop.baseName.equals(recordKey)).findFirst().get();
+            Optional<CodegenModel> complexModel = allModels.stream().filter(model -> model.getClassname().equals(property.complexType)).findFirst();
+            return complexModel;
+        }
         return allModels.stream().filter(model -> model.getClassname().equals(modelName)).findFirst();
     }
 
