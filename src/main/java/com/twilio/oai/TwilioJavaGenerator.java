@@ -1,6 +1,7 @@
 package com.twilio.oai;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.json.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
@@ -12,6 +13,7 @@ import lombok.AllArgsConstructor;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.languages.JavaClientCodegen;
 import org.openapitools.codegen.utils.StringUtils;
+
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -306,6 +308,7 @@ public class TwilioJavaGenerator extends JavaClientCodegen {
               .forEach(model -> {
 
                   resource.put("serialVersionUID", calculateSerialVersionUid(model.vars));
+                  model = resolveReferencesInModel(model, this.allModels);
                   responseModels.add(model);
                   processEnumVarsForAll(responseModels, co, model, resourceName);
 
@@ -332,6 +335,48 @@ public class TwilioJavaGenerator extends JavaClientCodegen {
         return results;
     }
 
+    private CodegenModel resolveReferencesInModel(CodegenModel model, List<CodegenModel> allModels) {
+        model.vars.forEach(property -> {
+            JSONObject js = new JSONObject(property.jsonSchema);
+            if(js.has("$ref")){
+                renameEnum(allModels, js.getString("$ref"), property);
+
+            }
+        });
+        return model;
+    }
+
+    private void renameEnum(List<CodegenModel> allModels, String reference, CodegenProperty property) {
+        String[] referencePath = reference.split("/");
+        String schemaName = referencePath[referencePath.length - 1];
+        allModels.forEach(item -> {
+            if(item.name.equalsIgnoreCase(schemaName)){
+                property.allowableValues =  item.allowableValues;
+                property.isEnum = true;
+                property.baseName = item.name;
+                property.getter = "get"+item.classname;
+                property.setter = "set"+item.classname;
+                property.name = item.name;
+                property.defaultValueWithParam = " = data."+item.name;
+                property.nameInCamelCase = item.classname;
+                property.nameInSnakeCase = item.name;
+
+            }
+        });
+
+    }
+
+    private String getAliasName(CodegenProperty property){
+        JSONObject js = new JSONObject(property.jsonSchema);
+        if(js.has("$ref")){
+            String reference = js.getString("$ref");
+            renameEnum(allModels, js.getString("$ref"), property);
+            String[] referencePath = reference.split("/");
+            return referencePath[referencePath.length - 1];
+        }
+        return null;
+    }
+
     private void processEnumVarsForAll(List<CodegenModel> responseModels, CodegenOperation co, CodegenModel model, String resourceName) {
             for (CodegenParameter param : co.allParams) {
                 if(param.isEnum){
@@ -345,8 +390,7 @@ public class TwilioJavaGenerator extends JavaClientCodegen {
 
         model.vars.forEach(item -> {
             if(item.isEnum){
-                item.dataType = generateDataType(resourceName, item.nameInCamelCase);
-
+                item.dataType = generateDataType(resourceName, item);
                 item.vendorExtensions.put("x-is-other-data-type", true);
 
             }
@@ -373,6 +417,12 @@ public class TwilioJavaGenerator extends JavaClientCodegen {
         property.name = co.paramName;
         property.nameInCamelCase = co.baseName.replaceAll("-","");
         property.nameInSnakeCase = co.baseName.replaceAll("-","_").toLowerCase();
+        property.jsonSchema = co.getSchema().jsonSchema;
+        JSONObject js = new JSONObject(property.jsonSchema);
+        if(js.has("$ref")){
+            renameEnum(allModels, js.getString("$ref"), property);
+        }
+
         return property;
     }
 
@@ -442,10 +492,21 @@ public class TwilioJavaGenerator extends JavaClientCodegen {
     }
 
     private CodegenParameter processEnumVars(CodegenParameter param, CodegenModel model, String resourceName) {
+        if(!param.isEnum){
+            String schemaString = param.getSchema().jsonSchema;
+        }
         if(param.isEnum){
             model.vars.forEach(item -> {
                 if(param.paramName.equalsIgnoreCase(item.nameInCamelCase) && item.isEnum == true){
-                    String baseType = generateDataType(resourceName, item.nameInCamelCase);
+                    String aliasName = getAliasName(createCodeGenPropertyFromParameter(param));
+                    String baseType = "";
+                    if(aliasName == null){
+                        baseType = generateDataType(resourceName, item.nameInCamelCase);
+                    }
+                    else{
+                        aliasName = StringUtils.camelize(aliasName, false);
+                        baseType = generateDataType(resourceName, aliasName);
+                    }
                     if(param.isArray){
                         param.dataType = "List<"+ baseType +">";
                         param.baseType = baseType;
@@ -456,6 +517,9 @@ public class TwilioJavaGenerator extends JavaClientCodegen {
                     param.vendorExtensions.put("x-is-other-data-type", true);
                 }
             });
+        }
+        else{
+            String aliasName = getAliasName()
         }
         return param;
     }
