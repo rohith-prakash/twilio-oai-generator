@@ -68,12 +68,12 @@ jobs:
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-            run: |
-                dotnet tool install --global dotnet-sonarscanner
-                dotnet sonarscanner begin /d:sonar.login="${SONAR_TOKEN}"
-                dotnet build Twilio.sln > buildforsonar.log
-                dotnet test test/Twilio.Test/Twilio.Test.csproj --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=../lcov
-                dotnet sonarscanner end /d:sonar.login="${SONAR_TOKEN}"
+        run: |
+            dotnet tool install --global dotnet-sonarscanner
+            dotnet sonarscanner begin /d:sonar.login="${SONAR_TOKEN}"
+            dotnet build Twilio.sln > buildforsonar.log
+            dotnet test test/Twilio.Test/Twilio.Test.csproj --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=../lcov
+            dotnet sonarscanner end /d:sonar.login="${SONAR_TOKEN}"
 
 
   notify-on-failure:
