@@ -67,8 +67,9 @@ public class TwilioCsharpGenerator extends CSharpClientCodegen {
         apiDocTemplateFiles.clear();
         supportingFiles.clear();
         apiTemplateFiles.clear();
-        //apiTemplateFiles.put("mustache/Resource.mustache", "Resource.cs");
-        //apiTemplateFiles.put("mustache/Options.mustache", "Options.cs");
+        apiTemplateFiles.put("Resource.mustache", "Resource.cs");
+        apiTemplateFiles.put("Options.mustache", "Options.cs");
+
         apiTemplateFiles.put("resource/CreateResource.mustache", "ResourceCreator.cs");
         apiTemplateFiles.put("resource/DeleteResource.mustache", "ResourceDeleter.cs");
         apiTemplateFiles.put("resource/FetchResource.mustache", "ResourceFetcher.cs");
