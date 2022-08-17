@@ -69,21 +69,21 @@ public class TwilioCsharpGenerator extends CSharpClientCodegen {
         apiTemplateFiles.clear();
         //apiTemplateFiles.put("mustache/Resource.mustache", "Resource.cs");
         //apiTemplateFiles.put("mustache/Options.mustache", "Options.cs");
-        apiTemplateFiles.put("resource/CreateResource.mustache", "/resource/CreateResource.cs");
-        apiTemplateFiles.put("resource/DeleteResource.mustache", "/resource/DeleteResource.cs");
-        apiTemplateFiles.put("resource/FetchResource.mustache", "/resource/FetchResource.cs");
-        apiTemplateFiles.put("resource/GeneratePath.mustache", "/resource/GeneratePath.cs");
-        apiTemplateFiles.put("resource/ReadResource.mustache", "/resource/ReadResource.cs");
-        apiTemplateFiles.put("resource/ResponseModel.mustache", "/resource/ResponseModel.cs");
-        apiTemplateFiles.put("resource/UpdateResource.mustache", "/resource/UpdateResource.cs");
+        apiTemplateFiles.put("resource/CreateResource.mustache", "ResourceCreator.cs");
+        apiTemplateFiles.put("resource/DeleteResource.mustache", "ResourceDeleter.cs");
+        apiTemplateFiles.put("resource/FetchResource.mustache", "ResourceFetcher.cs");
+        apiTemplateFiles.put("resource/GeneratePath.mustache", "ResourceGeneratePath.cs");
+        apiTemplateFiles.put("resource/ReadResource.mustache", "ResourceReader.cs");
+        apiTemplateFiles.put("resource/ResponseModel.mustache", "ResourceResponseModel.cs");
+        apiTemplateFiles.put("resource/UpdateResource.mustache", "ResourceUpdater.cs");
 
 
-        apiTemplateFiles.put("options/CreateOptions.mustache", "/options/CreateOptions.cs");
-        apiTemplateFiles.put("options/DeleteOptions.mustache", "/options/DeleteOptions.cs");
-        apiTemplateFiles.put("options/FetchOptions.mustache", "/options/FetchOptions.cs");
-        apiTemplateFiles.put("options/Params.mustache", "/options/Params.cs");
-        apiTemplateFiles.put("options/ReadOptions.mustache", "/options/ReadOptions.cs");
-        apiTemplateFiles.put("options/UpdateOptions.mustache", "/options/UpdateOptions.cs");
+        apiTemplateFiles.put("options/CreateOptions.mustache", "OptionsCreator.cs");
+        apiTemplateFiles.put("options/DeleteOptions.mustache", "OptionsDeleter.cs");
+        apiTemplateFiles.put("options/FetchOptions.mustache", "OptionsFetcher.cs");
+        apiTemplateFiles.put("options/Params.mustache", "OptionsParams.cs");
+        apiTemplateFiles.put("options/ReadOptions.mustache", "OptionsReader.cs");
+        apiTemplateFiles.put("options/UpdateOptions.mustache", "OptionsUpdater.cs");
 
         modelTemplateFiles.clear();
         modelTestTemplateFiles.clear();
@@ -144,6 +144,7 @@ public class TwilioCsharpGenerator extends CSharpClientCodegen {
 
             String[] filePathArray = co.baseName.split(ApplicationConstants.PATH_SEPARATOR_PLACEHOLDER);
             String resourceName = filePathArray[filePathArray.length - 1];
+
             final Map<String, Object> resource = resources.computeIfAbsent(resourceName, k -> new LinkedHashMap<>());
             populateCrudOperations(resource, co);
             updateCodeOperationParams(co, resourceName);
