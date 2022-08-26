@@ -18,6 +18,7 @@ import com.twilio.base.Creator;
 import com.twilio.converter.Promoter;
 import com.twilio.exception.ApiConnectionException;
 import com.twilio.converter.PrefixedCollapsibleMap;
+import com.twilio.converter.Converter;
 import com.twilio.exception.ApiException;
 import com.twilio.exception.RestException;
 import com.twilio.http.HttpMethod;
@@ -76,6 +77,11 @@ public class AccountCreator extends Creator<Account>{
         this.recordingStatusCallback = recordingStatusCallback;
         return this;
     }
+
+    public AccountCreator setRecordingStatusCallback(final String recordingStatusCallback){
+    this.recordingStatusCallback = Promoter.uriFromString(recordingStatusCallback);
+    return this;
+    }
     public AccountCreator setRecordingStatusCallbackEvent(final List<String> recordingStatusCallbackEvent){
         this.recordingStatusCallbackEvent = recordingStatusCallbackEvent;
         return this;
@@ -84,6 +90,7 @@ public class AccountCreator extends Creator<Account>{
     @Override
     public Account create(final TwilioRestClient client){
         String path = "/2010-04-01/Accounts.json";
+
 
         Request request = new Request(
             HttpMethod.POST,
@@ -120,6 +127,7 @@ public class AccountCreator extends Creator<Account>{
     private void addHeaderParams(final Request request) {
         if (xTwilioWebhookEnabled != null) {
             request.addHeaderParam("X-Twilio-Webhook-Enabled", xTwilioWebhookEnabled.toString());
+
         }
     }
 }

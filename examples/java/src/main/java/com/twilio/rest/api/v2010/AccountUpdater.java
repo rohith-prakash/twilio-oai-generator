@@ -18,6 +18,7 @@ import com.twilio.base.Updater;
 import com.twilio.converter.Promoter;
 import com.twilio.exception.ApiConnectionException;
 import com.twilio.converter.PrefixedCollapsibleMap;
+import com.twilio.converter.Converter;
 import com.twilio.exception.ApiException;
 import com.twilio.exception.RestException;
 import com.twilio.http.HttpMethod;
@@ -79,6 +80,7 @@ public class AccountUpdater extends Updater<Account>{
     @Override
     public Account update(final TwilioRestClient client){
         String path = "/2010-04-01/Accounts/{Sid}.json";
+
         this.sid = this.sid == null ? client.getAccountSid() : this.sid;
         path = path.replace("{"+"Sid"+"}", this.sid.toString());
         path = path.replace("{"+"Status"+"}", this.status.toString());
