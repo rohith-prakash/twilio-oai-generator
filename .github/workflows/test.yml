@@ -46,8 +46,8 @@ jobs:
           git diff
           test -z "$(git status --porcelain)"
 
-      - name: Remove pom file  # Otherwise, the Sonar action fails and recommends using the Maven plugin
-        run: rm pom.xml
+#      - name: Remove pom file  # Otherwise, the Sonar action fails and recommends using the Maven plugin
+#        run: rm pom.xml
 
       - name: Install SonarCloud scanner and run analysis
         uses: SonarSource/sonarcloud-github-action@master
