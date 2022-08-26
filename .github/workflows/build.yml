@@ -2,7 +2,7 @@ name: Build
 on:
   push:
     branches:
-      - master
+      - main
       - add-sonar-csharp-docker-test
   pull_request:
     types: [opened, synchronize, reopened]
