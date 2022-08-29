@@ -70,7 +70,7 @@ jobs:
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
             dotnet tool install --global dotnet-sonarscanner
-            curl http://127.0.0.1:9000/api/editions/is_valid_license
+            curl http://127.0.0.1:9000 
             dotnet sonarscanner begin /d:sonar.login="${SONAR_TOKEN}" /k:"rohith-prakash_openapi-generator"
             dotnet build Twilio.sln > buildforsonar.log
             dotnet test test/Twilio.Test/Twilio.Test.csproj --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=../lcov
