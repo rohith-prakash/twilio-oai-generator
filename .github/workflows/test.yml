@@ -71,6 +71,7 @@ jobs:
         run: |
             dotnet tool install --global dotnet-sonarscanner
             ifconfig
+            docker-machine ip default
             dotnet sonarscanner begin /d:sonar.login="${SONAR_TOKEN}" /k:"rohith-prakash_openapi-generator"
             dotnet build Twilio.sln > buildforsonar.log
             dotnet test test/Twilio.Test/Twilio.Test.csproj --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=../lcov
