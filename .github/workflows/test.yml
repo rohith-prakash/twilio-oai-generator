@@ -34,11 +34,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_AUTH_TOKEN }}
 
-      - name: Run unit tests
-        run: make test
-
-      - name: Run helper tests
-        run: make test-docker
+#      - name: Run unit tests
+#        run: make test
+#
+#      - name: Run helper tests
+#        run: make test-docker
 
 #      - name: Show git status and fail on diff
 #        run: |
@@ -70,7 +70,7 @@ jobs:
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
             dotnet tool install --global dotnet-sonarscanner
-            curl http://localhost:9000/api/editions/is_valid_license
+            curl http://$(echo docker-machine ip default):9000/api/editions/is_valid_license
             dotnet sonarscanner begin /d:sonar.login="${SONAR_TOKEN}" /k:"rohith-prakash_openapi-generator"
             dotnet build Twilio.sln > buildforsonar.log
             dotnet test test/Twilio.Test/Twilio.Test.csproj --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=../lcov
