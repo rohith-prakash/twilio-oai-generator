@@ -72,8 +72,7 @@ jobs:
       ports:
         - 9000:9000
     runs-on: ubuntu-latest
-    steps:
-    - run: |
+    run: |
         dotnet tool install --global dotnet-sonarscanner
         curl http://127.0.0.1:9000 
         dotnet sonarscanner begin /d:sonar.login="${SONAR_TOKEN}" /k:"rohith-prakash_openapi-generator"
