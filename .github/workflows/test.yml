@@ -69,7 +69,6 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-#            export PATH="$PATH:/root/.dotnet/tools"
             dotnet tool install --global dotnet-sonarscanner
             dotnet sonarscanner begin /d:sonar.login="${SONAR_TOKEN}" /k:"rohith-prakash_openapi-generator"
             dotnet build Twilio.sln > buildforsonar.log
