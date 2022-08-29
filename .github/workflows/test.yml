@@ -66,6 +66,7 @@ jobs:
     service:
       ports:
         - 9000:9000
+    runs-on: ubuntu-latest
     steps:
     - name: Install SonarCloud scanner and run analysis
       if: (github.event_name == 'pull_request' || github.ref_type == 'branch') && !github.event.pull_request.head.repo.fork
