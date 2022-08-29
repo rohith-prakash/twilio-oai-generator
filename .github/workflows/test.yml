@@ -62,19 +62,23 @@ jobs:
         uses: actions/setup-dotnet@v1.8.2
         with:
           dotnet-version: '3.1.x'
-
-      - name: Install SonarCloud scanner and run analysis
-        if: (github.event_name == 'pull_request' || github.ref_type == 'branch') && !github.event.pull_request.head.repo.fork
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-            dotnet tool install --global dotnet-sonarscanner
-            curl http://127.0.0.1:9000 
-            dotnet sonarscanner begin /d:sonar.login="${SONAR_TOKEN}" /k:"rohith-prakash_openapi-generator"
-            dotnet build Twilio.sln > buildforsonar.log
-            dotnet test test/Twilio.Test/Twilio.Test.csproj --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=../lcov
-            dotnet sonarscanner end /d:sonar.login="${SONAR_TOKEN}" /k:"rohith-prakash_openapi-generator"
+  sonar-cloud:
+    service:
+      ports:
+        - 9000:9000
+    steps:
+    - name: Install SonarCloud scanner and run analysis
+      if: (github.event_name == 'pull_request' || github.ref_type == 'branch') && !github.event.pull_request.head.repo.fork
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+          dotnet tool install --global dotnet-sonarscanner
+          curl http://127.0.0.1:9000 
+          dotnet sonarscanner begin /d:sonar.login="${SONAR_TOKEN}" /k:"rohith-prakash_openapi-generator"
+          dotnet build Twilio.sln > buildforsonar.log
+          dotnet test test/Twilio.Test/Twilio.Test.csproj --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=../lcov
+          dotnet sonarscanner end /d:sonar.login="${SONAR_TOKEN}" /k:"rohith-prakash_openapi-generator"
 
 
 #  notify-on-failure:
