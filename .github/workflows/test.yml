@@ -70,7 +70,7 @@ jobs:
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
             dotnet tool install --global dotnet-sonarscanner
-            curl http://$(echo docker-machine ip default):9000/api/editions/is_valid_license
+            ifconfig
             dotnet sonarscanner begin /d:sonar.login="${SONAR_TOKEN}" /k:"rohith-prakash_openapi-generator"
             dotnet build Twilio.sln > buildforsonar.log
             dotnet test test/Twilio.Test/Twilio.Test.csproj --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=../lcov
@@ -94,3 +94,5 @@ jobs:
 #          SLACK_FOOTER: Posted automatically using GitHub Actions
 #          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 #          MSG_MINIMAL: true
+
+#            curl http://$(echo docker-machine ip default):9000/api/editions/is_valid_license
