@@ -63,7 +63,7 @@ jobs:
         with:
           dotnet-version: '3.1.x'
   sonar-cloud:
-    service:
+    services:
       ports:
         - 9000:9000
     runs-on: ubuntu-latest
