@@ -13,9 +13,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    services:
-      ports:
-        - 9000:9000
     env:
       DOCKER_LOGIN: ${{ secrets.DOCKER_USERNAME && secrets.DOCKER_AUTH_TOKEN }}
     steps:
@@ -66,6 +63,9 @@ jobs:
 #          dotnet-version: '3.1.x'
 
       - name: Install SonarCloud scanner and run analysis
+        services:
+          ports:
+            - 9000:9000
         if: (github.event_name == 'pull_request' || github.ref_type == 'branch') && !github.event.pull_request.head.repo.fork
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
