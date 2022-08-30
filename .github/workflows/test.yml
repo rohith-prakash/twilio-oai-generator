@@ -11,9 +11,6 @@ on:
 
 jobs:
   test:
-    services:
-      ports:
-        - 9000:9000
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
