@@ -30,7 +30,7 @@ RUN dotnet sonarscanner begin /k:"twilio_twilio-csharp" /o:"twilio" /d:sonar.hos
 RUN	dotnet build Twilio.sln > buildforsonar.log
 RUN ls
 #RUN reportgenerator "-reports:./test/lcov.net451.opencover.xml" "-targetdir:test" "-reporttypes:SonarQube" -- enable this to generate better reports
-CMD ["/bin/bash", "-c", "dotnet test test/Twilio.Test/Twilio.Test.csproj --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=../lcov | tee /local/test-report.out && cp test/lcov.net451.opencover.xml /local" ]
+CMD ["/bin/bash", "-c", "dotnet test test/Twilio.Test/Twilio.Test.csproj --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=../lcov | tee /local/test-report.out && cp test/lcov.net451.opencover.xml /local && cp -r /app /local/app" ]
 #RUN dotnet sonarscanner end
  #-- enable this when syncing up with sonarcloud
 
