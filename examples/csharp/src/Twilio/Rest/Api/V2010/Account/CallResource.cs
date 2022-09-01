@@ -292,7 +292,7 @@ namespace Twilio.Rest.Api.V2010.Account
         public List<int> TestArrayOfIntegers { get; private set; }
 
         [JsonProperty("test_array_of_array_of_integers")]
-        public List<int>> TestArrayOfArrayOfIntegers { get; private set; }
+        public List<int> TestArrayOfArrayOfIntegers { get; private set; }
 
         [JsonProperty("test_array_of_objects")]
         public List<FeedbackIssue> TestArrayOfObjects { get; private set; }

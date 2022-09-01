@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using Twilio.Base;
 using Twilio.Converters;
 
-using System.Linq
+using System.Linq;
 
 namespace Twilio.Rest.Api.V2010.Credential
 {
