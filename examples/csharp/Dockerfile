@@ -24,7 +24,7 @@ COPY test/ /app/twilio-csharp/test
 
 RUN dotnet restore
 RUN dotnet build -c Release
-
+#RUN dotnet test test/Twilio.Test/Twilio.Test.csproj --no-build
 # sonar coverage reports
 # Add /d:sonar.login="${SONAR_TOKEN}" to sync up with sonarcloud.
 RUN dotnet sonarscanner begin /k:"twilio_twilio-csharp" /o:"twilio" /d:sonar.host.url=https://sonarcloud.io /d:sonar.language="cs" /d:sonar.exclusions="src/Twilio/Rest/**/*.*,test/Twilio.Test/**/*.*" /d:sonar.cs.opencover.reportsPaths="test/lcov.net451.opencover.xml" /d:sonar.coverageReportPaths=".\sonarqubecoverage\SonarQube.xml"
