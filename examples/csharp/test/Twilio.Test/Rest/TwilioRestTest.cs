@@ -175,6 +175,56 @@ namespace Twilio.Test.Rest
            Assert.NotNull(response);
        }
 
+        [Test]
+        public void TestAwsResourceObjectCreation()
+        {
+            string json = "{\"sid\": \"ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\",\"test_string\":\"AwsResourceTestString\",\"test_integer\":123}";
+            var awsResource = AwsResource.FromJson(json);
+            Assert.IsNotNull(awsResource);
+            Assert.AreEqual("ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",awsResource.Sid);
+            Assert.AreEqual("AwsResourceTestString",awsResource.TestString);
+            Assert.AreEqual(123,awsResource.TestInteger);
+        }
 
+        [Test]
+        public void TestAwsResourcePagination()
+        {
+            var twilioRestClient = Substitute.For<ITwilioRestClient>();
+            string firstPageURI = "/v1/Credentials/AWS";
+            string secondPageURI = "/v1/Credentials/AWS";
+
+            var requestSecondPage = new Request(
+                HttpMethod.Get,
+                Twilio.Rest.Domain.Api,
+                secondPageURI
+            );
+
+            requestSecondPage.AddQueryParam("PageSize", "2");
+            string responseContentFirstPage = "{\"credentials\":[" +
+                "{\"sid\":\"CR12345678123456781234567812345678\", \"test_string\":\"Ahoy\", \"test_object\":{\"mms\": true, \"sms\":false, \"voice\": false, \"fax\":true}}" +
+                "],\"meta\": {\"url\":\"" + firstPageURI + "\", \"next_page_url\":\"" + secondPageURI + "?PageSize=2" + "\", \"previous_page_url\":\"" + firstPageURI + "?PageSize=2" + "\", \"first_page_url\":\"" + firstPageURI + "?PageSize=2" + "\", \"page_size\":2}}";
+
+            string responseContentSecondPage = "{\"credentials\":[" +
+                "{\"sid\":\"CR12345678123456781234567812345678\", \"test_string\":\"Matey\", \"test_object\":{\"mms\": true, \"sms\":false, \"voice\": false, \"fax\":true}}" +
+                "],\"meta\": {\"url\":\"" + firstPageURI + "\", \"next_page_url\":\"" + "" + "?PageSize=2" + "\", \"previous_page_url\":\"" + firstPageURI + "?PageSize=2" + "\", \"first_page_url\":\"" + firstPageURI + "?PageSize=2" + "\", \"page_size\":2}}";
+
+            Page<AwsResource> secondPage = Page<AwsResource>.FromJson("credentials", responseContentSecondPage);
+            Assert.IsNotNull(secondPage);
+
+            twilioRestClient.Request(Arg.Any<Request>()).Returns(new Response(System.Net.HttpStatusCode.OK, responseContentFirstPage));
+            Page<AwsResource> previousPage = AwsResource.PreviousPage(secondPage, client: twilioRestClient); //Get's First Page
+            Assert.IsNotNull(previousPage);
+
+            twilioRestClient.Request(requestSecondPage).Returns(new Response(System.Net.HttpStatusCode.OK, responseContentSecondPage));
+            Page<AwsResource> page = AwsResource.GetPage(secondPageURI,twilioRestClient);//Get's second page
+            Assert.IsNotNull(page);
+            Page<AwsResource> nextPage = AwsResource.NextPage(previousPage, twilioRestClient); // Get's second page
+            Assert.IsNotNull(nextPage);
+
+            Assert.AreEqual("CR12345678123456781234567812345678", page.Records[0].Sid);
+            Assert.AreEqual("CR12345678123456781234567812345678", secondPage.Records[0].Sid);
+            Assert.AreEqual("CR12345678123456781234567812345678", previousPage.Records[0].Sid);
+            Assert.AreEqual("CR12345678123456781234567812345678", nextPage.Records[0].Sid);
+        }
     }
 }
