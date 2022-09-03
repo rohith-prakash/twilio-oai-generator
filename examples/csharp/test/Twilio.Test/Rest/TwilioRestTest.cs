@@ -191,15 +191,8 @@ namespace Twilio.Test.Rest
         {
             var twilioRestClient = Substitute.For<ITwilioRestClient>();
             string firstPageURI = "/v1/Credentials/AWS";
-            string secondPageURI = "/v1/Credentials/AWS";
+            string secondPageURI = "/v1/Credentials/AWSN";
 
-            var requestSecondPage = new Request(
-                HttpMethod.Get,
-                Twilio.Rest.Domain.Api,
-                secondPageURI
-            );
-
-            requestSecondPage.AddQueryParam("PageSize", "2");
             string responseContentFirstPage = "{\"credentials\":[" +
                 "{\"sid\":\"CR12345678123456781234567812345678\", \"test_string\":\"Ahoy\", \"test_object\":{\"mms\": true, \"sms\":false, \"voice\": false, \"fax\":true}}" +
                 "],\"meta\": {\"url\":\"" + firstPageURI + "\", \"next_page_url\":\"" + secondPageURI + "?PageSize=2" + "\", \"previous_page_url\":\"" + firstPageURI + "?PageSize=2" + "\", \"first_page_url\":\"" + firstPageURI + "?PageSize=2" + "\", \"page_size\":2}}";
@@ -215,16 +208,16 @@ namespace Twilio.Test.Rest
             Page<AwsResource> previousPage = AwsResource.PreviousPage(secondPage, client: twilioRestClient); //Get's First Page
             Assert.IsNotNull(previousPage);
 
-            twilioRestClient.Request(requestSecondPage).Returns(new Response(System.Net.HttpStatusCode.OK, responseContentSecondPage));
+            twilioRestClient.Request(Arg.Any<Request>()).Returns(new Response(System.Net.HttpStatusCode.OK, responseContentSecondPage));
             Page<AwsResource> page = AwsResource.GetPage(secondPageURI,twilioRestClient);//Get's second page
             Assert.IsNotNull(page);
             Page<AwsResource> nextPage = AwsResource.NextPage(previousPage, twilioRestClient); // Get's second page
             Assert.IsNotNull(nextPage);
 
-            Assert.AreEqual("CR12345678123456781234567812345678", page.Records[0].Sid);
-            Assert.AreEqual("CR12345678123456781234567812345678", secondPage.Records[0].Sid);
-            Assert.AreEqual("CR12345678123456781234567812345678", previousPage.Records[0].Sid);
-            Assert.AreEqual("CR12345678123456781234567812345678", nextPage.Records[0].Sid);
+            Assert.AreEqual("Matey", page.Records[0].TestString);
+            Assert.AreEqual("Matey", secondPage.Records[0].TestString);
+            Assert.AreEqual("Ahoy", previousPage.Records[0].TestString);
+            Assert.AreEqual("Matey", nextPage.Records[0].TestString);
         }
     }
 }
