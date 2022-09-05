@@ -12,6 +12,7 @@ using System.Collections;
 using Twilio.Rest.Api.V2010;
 using Twilio.Rest.Api.V2010.Credential;
 using Twilio.Base;
+using Twilio.Rest.Api.V2010.Account;
 
 namespace Twilio.Test.Rest
 {
@@ -219,5 +220,121 @@ namespace Twilio.Test.Rest
             Assert.AreEqual("Ahoy", previousPage.Records[0].TestString);
             Assert.AreEqual("Matey", nextPage.Records[0].TestString);
         }
+
+        [Test]
+        public void TestShouldMakeValidAPICallAwsResourceDelete()
+        {
+            var twilioRestClient = Substitute.For<ITwilioRestClient>();
+            string testResponse = "{\"accountSid\": \"sid\"}";
+            twilioRestClient.Request(Arg.Any<Request>()).Returns(new Response(System.Net.HttpStatusCode.OK, testResponse));
+            bool resource = AwsResource.Delete(ACCOUNT_SID,client:twilioRestClient);
+            Assert.False(resource);
+        }
+
+        [Test]
+        public void TestAwsResourceObjectCreationExceptionForBrokenJson()
+        {
+            string json = "{broken_json_key:value";
+            Assert.Throws<ApiException>(() => AwsResource.FromJson(json));
+        }
+
+        [Test]
+        public void testAwsResourceGet()
+        {
+            String json = "{\"account_sid\": \"a123\", \"sid\": \"123\", \"test_integer\": 123, \"test_number\": 123.1, \"test_number_float\": 123.2, " +
+                "\"test_enum\": \"paused\"}";
+            String jsonDuplicate = "{\"account_sid\": \"a123\", \"sid\": \"123\", \"test_integer\": 123, \"test_number\": 123.1, \"test_number_float\": 123.2, " +
+                 "\"test_enum\": \"paused\"}";
+
+            AwsResource aws = AwsResource.FromJson(json);
+            AwsResource awsDuplicate = AwsResource.FromJson(jsonDuplicate);
+
+            Assert.IsNotNull(aws);
+            Assert.IsNotNull(awsDuplicate);
+            Assert.IsNotNull(aws.AccountSid);
+            Assert.IsNotNull(aws.Sid);
+            Assert.IsNotNull(aws.TestEnum);
+            Assert.AreEqual(aws.AccountSid,awsDuplicate.AccountSid);
+            Assert.AreEqual(aws.Sid,awsDuplicate.Sid);
+            Assert.AreEqual(aws.TestInteger,awsDuplicate.TestInteger);
+            Assert.AreEqual(aws.TestNumber,awsDuplicate.TestNumber);
+            Assert.AreEqual(aws.TestNumberFloat,awsDuplicate.TestNumberFloat);
+            Assert.AreEqual(aws.TestEnum,awsDuplicate.TestEnum);
+
+            Assert.AreEqual("a123",aws.AccountSid);
+            Assert.AreEqual("123",aws.Sid);
+            Assert.AreEqual(123,aws.TestInteger);
+        }
+
+        [Test]
+        public void TestAwsResourceUpdate()
+        {
+            var twilioRestClient = Substitute.For<ITwilioRestClient>();
+            string testResponse = "{\"account_sid\":\"" + ACCOUNT_SID + "\",\"test_string\":\"hello\" }";
+            twilioRestClient.Request(Arg.Any<Request>()).Returns(new Response(System.Net.HttpStatusCode.OK, testResponse));
+            AwsResource aws = AwsResource.Update(ACCOUNT_SID, client: twilioRestClient);
+            Assert.IsNotNull(aws);
+            Assert.IsNotNull(aws.TestString);
+            Assert.AreEqual("hello", aws.TestString);
+        }
+
+        [Test]
+        public void TestShouldAddAccountSidIfNotPresent()
+        {
+            var twilioRestClient = Substitute.For<ITwilioRestClient>();
+            twilioRestClient.AccountSid.Returns(ACCOUNT_SID);
+            Request request = new Request(
+                    HttpMethod.Get,
+                    Twilio.Rest.Domain.Api,
+                    "/2010-04-01/Accounts/AC222222222222222222222222222222/Calls/123.json"
+            );
+
+            twilioRestClient.Request(request).Returns(new Response(System.Net.HttpStatusCode.OK, "{\"account_sid\":\"AC222222222222222222222222222222\",\"call_sid\":\"PNXXXXY\", \"sid\":123, \"test_object\":{\"mms\": true, \"sms\":false, \"voice\": false, \"fax\":true}}"));
+            CallResource call = CallResource.Fetch(123,client:twilioRestClient);
+            Assert.IsNotNull(call);
+            Assert.AreEqual("123", call.Sid);
+            Assert.AreEqual(ACCOUNT_SID, call.AccountSid);
+        }
+
+        [Test]
+        public void TestCallObjectCreation()
+        {
+            String json = "{\"test_integer\": 123}";
+            CallResource call = CallResource.FromJson(json);
+            Assert.IsNotNull(call);
+            Assert.IsNotNull(call.TestInteger);
+            Assert.AreEqual(123, call.TestInteger);
+        }
+
+        [Test]
+        public void testCallResourceGet()
+        {
+            String json = "{\"account_sid\": \"a123\", \"sid\": \"123\", \"test_integer\": 123, \"test_number\": 123.1, \"test_number_float\": 123.2, " +
+                "\"test_enum\": \"paused\"}";
+            String jsonDuplicate = "{\"account_sid\": \"a123\", \"sid\": \"123\", \"test_integer\": 123, \"test_number\": 123.1, \"test_number_float\": 123.2, " +
+                 "\"test_enum\": \"paused\"}";
+
+            CallResource call = CallResource.FromJson(json);
+            CallResource callDuplicate = CallResource.FromJson(jsonDuplicate);
+
+            Assert.IsNotNull(call);
+            Assert.IsNotNull(callDuplicate);
+            Assert.IsNotNull(call.AccountSid);
+            Assert.IsNotNull(call.Sid);
+            Assert.IsNotNull(call.TestEnum);
+            Assert.AreEqual(call.AccountSid,callDuplicate.AccountSid);
+            Assert.AreEqual(call.Sid,callDuplicate.Sid);
+            Assert.AreEqual(call.TestInteger,callDuplicate.TestInteger);
+            Assert.AreEqual(call.TestNumber,callDuplicate.TestNumber);
+            Assert.AreEqual(call.TestNumberFloat,callDuplicate.TestNumberFloat);
+            Assert.AreEqual(call.TestEnum,callDuplicate.TestEnum);
+
+            Assert.AreEqual("a123",call.AccountSid);
+            Assert.AreEqual("123",call.Sid);
+            Assert.AreEqual(123,call.TestInteger);
+        }
+
+
+
     }
 }
