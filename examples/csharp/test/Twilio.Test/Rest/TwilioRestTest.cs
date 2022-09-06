@@ -13,6 +13,7 @@ using Twilio.Rest.Api.V2010;
 using Twilio.Rest.Api.V2010.Credential;
 using Twilio.Base;
 using Twilio.Rest.Api.V2010.Account;
+using Twilio.Rest.Api.V2010.Account.Call;
 
 namespace Twilio.Test.Rest
 {
@@ -332,6 +333,51 @@ namespace Twilio.Test.Rest
             Assert.AreEqual("a123",call.AccountSid);
             Assert.AreEqual("123",call.Sid);
             Assert.AreEqual(123,call.TestInteger);
+        }
+
+        [Test]
+        public void TestFeedbackCallSummaryObjectCreationResponseValid()
+        {
+            var twilioRestClient = Substitute.For<ITwilioRestClient>();
+            DateTime startDate = DateTime.Parse("2009-01-27");
+            DateTime endDate = DateTime.Parse("2022-01-27");
+
+            twilioRestClient.AccountSid.Returns("sid");
+            twilioRestClient.Request(Arg.Any<Request>()).Returns(new Response(System.Net.HttpStatusCode.OK, "{ \"account_sid\":\"AXCCCCC1234567891234567\",\"sid\":\"123\"}"));
+            FeedbackCallSummaryResource feedbackSummary = FeedbackCallSummaryResource.Create(startDate, endDate,pathAccountSid:ACCOUNT_SID,client:twilioRestClient);
+            Assert.IsNotNull(feedbackSummary);
+        }
+
+
+        [Test]
+        public void TestFeedbackCallSummaryResourceGet()
+        {
+            String json = "{\"account_sid\": \"a123\", \"sid\": \"123\", \"test_integer\": 123, \"test_number\": 123.1, \"test_number_float\": 123.2, " +
+                "\"test_enum\": \"paused\"}";
+            String jsonDuplicate = "{\"account_sid\": \"a123\", \"sid\": \"123\", \"test_integer\": 123, \"test_number\": 123.1, \"test_number_float\": 123.2, " +
+                 "\"test_enum\": \"paused\"}";
+            FeedbackCallSummaryResource feedback = FeedbackCallSummaryResource.FromJson(json);
+            FeedbackCallSummaryResource feedbackDuplicate = FeedbackCallSummaryResource.FromJson(jsonDuplicate);
+            Assert.IsNotNull(feedback);
+            Assert.IsNotNull(feedbackDuplicate);
+            Assert.IsNotNull(feedback.AccountSid);
+            Assert.IsNotNull(feedback.Sid);
+            Assert.IsNotNull(feedback.TestEnum);
+            Assert.AreEqual(feedback.AccountSid,feedbackDuplicate.AccountSid);
+            Assert.AreEqual(feedback.Sid,feedbackDuplicate.Sid);
+            Assert.AreEqual(feedback.TestInteger,feedbackDuplicate.TestInteger);
+            Assert.AreEqual(feedback.TestNumber,feedbackDuplicate.TestNumber);
+            Assert.AreEqual(feedback.TestNumberFloat,feedbackDuplicate.TestNumberFloat);
+            Assert.AreEqual(feedback.TestEnum,feedbackDuplicate.TestEnum);
+            Assert.AreEqual("a123",feedback.AccountSid);
+            Assert.AreEqual("123",feedback.Sid);
+            Assert.AreEqual(123,feedback.TestInteger);
+        }
+
+        [Test]
+        public void TestFeedbackCallSummaryObjectCreationFromInvalidString() {
+            string invalidJson = "invalid";
+            Assert.Throws<ApiException>(() => {var feedback = FeedbackCallSummaryResource.FromJson(invalidJson);});
         }
 
 
