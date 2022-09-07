@@ -715,5 +715,6 @@ namespace Twilio.Test.Rest
             Assert.AreEqual("{\"TestInteger\":1}", request.PostParams.Single(kvp => kvp.Key == "TestAnyType").Value);
         }
         #endif
+    }
 
 }

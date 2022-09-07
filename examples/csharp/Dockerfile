@@ -19,8 +19,10 @@ WORKDIR /app/twilio-csharp
 RUN rm -rf /app/twilio-csharp/src/Twilio/Rest/*
 COPY src/Twilio/ /app/twilio-csharp/src/Twilio
 
-RUN rm -rf /app/twilio-csharp/test/*
-COPY test/ /app/twilio-csharp/test
+RUN rm -rf /app/twilio-csharp/test/Twilio.Test/Rest/*
+COPY test/Twilio.Test/Rest/ /app/twilio-csharp/test/Twilio.Test/Rest
+COPY test/Twilio.Test/Twilio.Test.csproj /app/twilio-csharp/test/Twilio.Test/
+COPY test/Twilio.Test/TwilioTest.cs /app/twilio-csharp/test/Twilio.Test/
 
 RUN dotnet restore
 RUN dotnet build -c Release
