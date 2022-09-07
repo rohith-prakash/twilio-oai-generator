@@ -8,12 +8,14 @@ using Twilio.Converters;
 using Twilio.Exceptions;
 using Twilio.Http;
 using System.Collections;
-
+using System.Linq;
 using Twilio.Rest.Api.V2010;
 using Twilio.Rest.Api.V2010.Credential;
 using Twilio.Base;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Rest.Api.V2010.Account.Call;
+using Twilio.Converters;
+using Newtonsoft.Json;
 
 namespace Twilio.Test.Rest
 {
@@ -612,9 +614,106 @@ namespace Twilio.Test.Rest
        }
        #endif
 
+        [Test]
+        public void TestAnyTypeParam()
+        {
+            var twilioRestClient = Substitute.For<ITwilioRestClient>();
+            Request request = new Request(
+                    HttpMethod.Post,
+                    Twilio.Rest.Domain.Api,
+                    "/v1/Credentials/AWS"
+            );
 
+            Dictionary<string, Object> anyMap = new Dictionary<string, Object>();
+            anyMap.Add(TEST_INTEGER, 1);
+            request.AddPostParam("TestAnyType", "{\"TestInteger\":1}");
+            request.AddPostParam("TestNumberFloat", "1.4");
+            request.AddPostParam(TEST_INTEGER, "1");
+            request.AddPostParam("TestString", ACCOUNT_SID);
+            twilioRestClient.Request(request).Returns(new Response(System.Net.HttpStatusCode.OK, "{\"account_sid\":\"AC222222222222222222222222222222\", \"sid\":\"PNXXXXY\"}"));
 
+            NewCredentialsResource credentials = NewCredentialsResource.Create("AC222222222222222222222222222222", testInteger:1, testNumberFloat:1.4F,testAnyType:anyMap, client: twilioRestClient);
 
+            Assert.IsNotNull(credentials);
+            Console.WriteLine(request.PostParams);
 
-    }
+            Assert.AreEqual("AC222222222222222222222222222222", request.PostParams.Single(kvp => kvp.Key == "TestString").Value);
+            Assert.AreEqual("{\"TestInteger\":1}", request.PostParams.Single(kvp => kvp.Key == "TestAnyType").Value);
+        }
+
+        [Test]
+        public void TestNewCredentialResourceObjectTest()
+        {
+            var twilioRestClient = Substitute.For<ITwilioRestClient>();
+            twilioRestClient.Request(Arg.Any<Request>()).Returns(new Response(System.Net.HttpStatusCode.OK, "{}"));
+            NewCredentialsResource credentials1 = NewCredentialsResource.Create(ACCOUNT_SID, testInteger: 1, testNumberFloat:1F,client:twilioRestClient);
+            NewCredentialsResource credentials2 = NewCredentialsResource.Create(ACCOUNT_SID, testInteger: 1, testAnyType: new Dictionary<string, Object>(), client: twilioRestClient);
+            NewCredentialsResource credentials3 = NewCredentialsResource.Create(ACCOUNT_SID, testDateTime: DateTime.Now, testAnyType: new Dictionary<string, Object>(),client: twilioRestClient);
+            NewCredentialsResource credentials4 = NewCredentialsResource.Create(ACCOUNT_SID, testDateTime: DateTime.Now, testNumberFloat: 1F, client: twilioRestClient);
+            Assert.IsNotNull(credentials1);
+            Assert.IsNotNull(credentials2);
+            Assert.IsNotNull(credentials3);
+            Assert.IsNotNull(credentials4);
+
+        }
+
+        [Test]
+            public void testNewCredentialsGetters()
+            {
+
+                string json = "{\"account_sid\": \"a123\", \"sid\": \"123\", \"test_integer\": 123, \"test_number\": 123.1, \"test_number_float\": 123.2, \"test_enum\": \"paused\", " +
+                        "\"test_enum\": \"paused\"}";
+                NewCredentialsResource credentials = NewCredentialsResource.FromJson(json);
+                NewCredentialsResource credentialsDuplicate = NewCredentialsResource.FromJson(json);
+
+                Assert.IsNotNull(credentials);
+                Assert.IsNotNull(credentialsDuplicate);
+                Assert.AreEqual("a123", credentials.AccountSid);
+                Assert.AreEqual("123", credentials.Sid);
+                Assert.IsNull(credentials.TestString);
+                Assert.IsNull(credentials.TestObject);
+                Assert.AreEqual(123, credentials.TestInteger);
+                Assert.IsNull(credentials.TestDateTime);
+
+                Assert.IsNull(credentials.PriceUnit);
+
+                Assert.IsNull(credentials.TestArrayOfIntegers);
+                Assert.IsNull(credentials.TestArrayOfArrayOfIntegers);
+                Assert.IsNull(credentials.TestArrayOfObjects);
+
+                Assert.AreEqual(credentials.AccountSid, credentialsDuplicate.AccountSid);
+                Assert.AreEqual(credentials.Sid, credentialsDuplicate.Sid);
+                Assert.AreEqual(credentials.TestInteger, credentialsDuplicate.TestInteger);
+                Assert.AreEqual(credentials.TestNumber, credentialsDuplicate.TestNumber);
+            }
+
+        #if !NET35
+        [Test]
+        public async System.Threading.Tasks.Task TestAnyTypeParamAsync()
+        {
+            var twilioRestClient = Substitute.For<ITwilioRestClient>();
+            Request request = new Request(
+                    HttpMethod.Post,
+                    Twilio.Rest.Domain.Api,
+                    "/v1/Credentials/AWS"
+            );
+
+            Dictionary<string, Object> anyMap = new Dictionary<string, Object>();
+            anyMap.Add(TEST_INTEGER, 1);
+            request.AddPostParam("TestAnyType", "{\"TestInteger\":1}");
+            request.AddPostParam("TestNumberFloat", "1.4");
+            request.AddPostParam(TEST_INTEGER, "1");
+            request.AddPostParam("TestString", ACCOUNT_SID);
+            twilioRestClient.RequestAsync(request).Returns(new Response(System.Net.HttpStatusCode.OK, "{\"account_sid\":\"AC222222222222222222222222222222\", \"sid\":\"PNXXXXY\"}"));
+
+            NewCredentialsResource credentials = await NewCredentialsResource.CreateAsync("AC222222222222222222222222222222", testInteger:1, testNumberFloat:1.4F,testAnyType:anyMap, client: twilioRestClient);
+
+            Assert.IsNotNull(credentials);
+            Console.WriteLine(request.PostParams);
+
+            Assert.AreEqual("AC222222222222222222222222222222", request.PostParams.Single(kvp => kvp.Key == "TestString").Value);
+            Assert.AreEqual("{\"TestInteger\":1}", request.PostParams.Single(kvp => kvp.Key == "TestAnyType").Value);
+        }
+        #endif
+
 }
