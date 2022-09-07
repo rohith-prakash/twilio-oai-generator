@@ -43,10 +43,12 @@ namespace Twilio.Test.Rest
                     var firstResult = awsEnumerator.Current;
                     Assert.IsNotNull(firstResult);
                     Assert.AreEqual("CR12345678123456781234567812345678", firstResult.Sid);
+                    Assert.AreEqual("Ahoy",firstResult.TestString);
                     awsEnumerator.MoveNext();
                     var secondResult = awsEnumerator.Current;
                     Assert.IsNotNull(secondResult);
                     Assert.AreEqual("CR12345678123456781234567812345678", secondResult.Sid);
+                    Assert.AreEqual("Hello",secondResult.TestString);
         }
 
 
@@ -379,6 +381,238 @@ namespace Twilio.Test.Rest
             string invalidJson = "invalid";
             Assert.Throws<ApiException>(() => {var feedback = FeedbackCallSummaryResource.FromJson(invalidJson);});
         }
+
+        #if !NET35
+        [Test]
+        public async System.Threading.Tasks.Task TestShouldMakeValidAPICallAWSFetchAsync()
+        {
+            var twilioRestClient = Substitute.For<ITwilioRestClient>();
+                    Request request = new Request(
+                            HttpMethod.Get,
+                            Twilio.Rest.Domain.Api,
+                            "/v1/Credentials/AWS"
+                    );
+                    string url = "https://api.twilio.com/v1/Credentials/AWS";
+                    String testResponse = "{\"credentials\":[{\"sid\":\"CR12345678123456781234567812345678\", \"test_string\":\"Ahoy\", \"test_object\":{\"mms\": true, \"sms\":false, \"voice\": false, \"fax\":true}}, {\"sid\":\"CR12345678123456781234567812345678\", \"test_string\":\"Hello\", \"test_object\":{\"mms\": true, \"sms\":false, \"voice\": false, \"fax\":true}}], \"meta\": {\"url\":\"" + url + "\", \"next_page_url\":\"" + url + "?PageSize=5" + "\", \"previous_page_url\":\"" + url + "?PageSize=3" + "\", \"first_page_url\":\"" + url + "?PageSize=1" + "\", \"page_size\":4}}";
+                    twilioRestClient.RequestAsync(request).Returns(new Response(System.Net.HttpStatusCode.OK, testResponse));
+                    var response = await AwsResource.ReadAsync(client: twilioRestClient);
+                    Assert.IsNotNull(response);
+                    var awsEnumerator = response.GetEnumerator();
+                    Assert.IsNotNull(awsEnumerator);
+                    awsEnumerator.MoveNext();
+                    var firstResult = awsEnumerator.Current;
+                    Assert.IsNotNull(firstResult);
+                    Assert.AreEqual("CR12345678123456781234567812345678", firstResult.Sid);
+                    Assert.AreEqual("Ahoy",firstResult.TestString);
+                    awsEnumerator.MoveNext();
+                    var secondResult = awsEnumerator.Current;
+                    Assert.IsNotNull(secondResult);
+                    Assert.AreEqual("CR12345678123456781234567812345678", secondResult.Sid);
+                    Assert.AreEqual("Hello",secondResult.TestString);
+        }
+        #endif
+
+        #if !NET35
+        [Test]
+        public async System.Threading.Tasks.Task testShouldGetInValidAPICallResponseAWSFetchAsync()
+        {
+            var twilioRestClient = Substitute.For<ITwilioRestClient>();
+            var request = new Request(
+                HttpMethod.Get,
+                Twilio.Rest.Domain.Api,
+                "/v1/Credentials/AWS/CRXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                ""
+            );
+            twilioRestClient.RequestAsync(request).Throws(new ApiException("Server Error, no content"));
+
+            try
+            {
+                await AwsResource.FetchAsync("CRXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", client: twilioRestClient);
+                Assert.Fail("Expected TwilioException to be thrown for 500");
+            }
+            catch (ApiException) {}
+            twilioRestClient.Received().RequestAsync(request);
+
+        }
+        #endif
+
+        #if !NET35
+        [Test]
+        public async System.Threading.Tasks.Task TestAwsResourceDeleteRequestAsync()
+        {
+            var twilioRestClient = Substitute.For<ITwilioRestClient>();
+            var request = new Request(
+                HttpMethod.Delete,
+                Twilio.Rest.Domain.Api,
+                "/v1/Credentials/AWS/CRXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+                ""
+            );
+            twilioRestClient.RequestAsync(request).Throws(new ApiException("Server Error, no content"));
+
+            try
+            {
+                await AwsResource.DeleteAsync("CRXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", client: twilioRestClient);
+                Assert.Fail("Expected TwilioException to be thrown for 500");
+            }
+            catch (ApiException) {}
+            twilioRestClient.Received().RequestAsync(request);
+        }
+        #endif
+
+        #if !NET35
+        [Test]
+        public async System.Threading.Tasks.Task TestAwsResourceDeleteResponseAsync()
+        {
+            var twilioRestClient = Substitute.For<ITwilioRestClient>();
+            twilioRestClient.AccountSid.Returns("ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+            twilioRestClient.RequestAsync(Arg.Any<Request>())
+                            .Returns(new Response(
+                                         System.Net.HttpStatusCode.NoContent,
+                                         "null"
+                                     ));
+
+            var response = await AwsResource.DeleteAsync("CRXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", client: twilioRestClient);
+            Assert.NotNull(response);
+        }
+        #endif
+
+        #if !NET35
+        [Test]
+        public async System.Threading.Tasks.Task TestAwsResourceUpdateResponseAsync()
+        {
+            var twilioRestClient = Substitute.For<ITwilioRestClient>();
+            twilioRestClient.AccountSid.Returns("ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+            twilioRestClient.RequestAsync(Arg.Any<Request>())
+                            .Returns(new Response(
+                                         System.Net.HttpStatusCode.OK,
+                                         "{\"account_sid\": \"ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"date_created\": \"2015-07-31T04:00:00Z\",\"date_updated\": \"2015-07-31T04:00:00Z\",\"friendly_name\": \"friendly_name\",\"sid\": \"CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"url\": \"https://accounts.twilio.com/v1/Credentials/AWS/CRaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}"
+                                     ));
+
+            var response = await AwsResource.UpdateAsync("CRXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", client: twilioRestClient);
+            Assert.NotNull(response);
+        }
+        #endif
+
+       #if !NET35
+       [Test]
+       public async System.Threading.Tasks.Task TestUpdateAwsResourceRequestAsync()
+       {
+           var twilioRestClient = Substitute.For<ITwilioRestClient>();
+           var request = new Request(
+               HttpMethod.Post,
+               Twilio.Rest.Domain.Api,
+               "/v1/Credentials/AWS/CRXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+               ""
+           );
+           twilioRestClient.RequestAsync(request).Throws(new ApiException("Server Error, no content"));
+           try
+           {
+               await AwsResource.UpdateAsync("CRXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX", client: twilioRestClient);
+               Assert.Fail("Expected TwilioException to be thrown for 500");
+           }
+           catch (ApiException) {}
+           twilioRestClient.Received().RequestAsync(request);
+       }
+       #endif
+
+       #if !NET35
+       [Test]
+       public async System.Threading.Tasks.Task TestAwsResourceReadRequestAsync()
+       {
+           var twilioRestClient = Substitute.For<ITwilioRestClient>();
+           var request = new Request(
+               HttpMethod.Get,
+               Twilio.Rest.Domain.Api,
+               "/v1/Credentials/AWS",
+               ""
+           );
+           twilioRestClient.RequestAsync(request).Throws(new ApiException("Server Error, no content"));
+           try
+           {
+               await AwsResource.ReadAsync(client: twilioRestClient);
+               Assert.Fail("Expected TwilioException to be thrown for 500");
+           }
+           catch (ApiException) {}
+           twilioRestClient.Received().RequestAsync(request);
+       }
+       #endif
+
+       #if !NET35
+       [Test]
+       public async System.Threading.Tasks.Task TestAwsResourceReadEmptyResponseAsync()
+       {
+           var twilioRestClient = Substitute.For<ITwilioRestClient>();
+           twilioRestClient.AccountSid.Returns("ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+           twilioRestClient.RequestAsync(Arg.Any<Request>())
+                           .Returns(new Response(
+                                        System.Net.HttpStatusCode.OK,
+                                        "{\"credentials\": [],\"meta\": {\"first_page_url\": \"https://accounts.twilio.com/v1/Credentials/AWS?PageSize=50&Page=0\",\"key\": \"credentials\",\"next_page_url\": null,\"page\": 0,\"page_size\": 50,\"previous_page_url\": null,\"url\": \"https://accounts.twilio.com/v1/Credentials/AWS?PageSize=50&Page=0\"}}"
+                                    ));
+           var response = await AwsResource.ReadAsync(client: twilioRestClient);
+           Assert.NotNull(response);
+       }
+       #endif
+
+        #if !NET35
+       [Test]
+       public async System.Threading.Tasks.Task TestShouldMakeValidAPICallAwsResourceDeleteAsync()
+       {
+           var twilioRestClient = Substitute.For<ITwilioRestClient>();
+           string testResponse = "{\"accountSid\": \"sid\"}";
+           twilioRestClient.RequestAsync(Arg.Any<Request>()).Returns(new Response(System.Net.HttpStatusCode.OK, testResponse));
+           bool resource = await AwsResource.DeleteAsync(ACCOUNT_SID,client:twilioRestClient);
+           Assert.False(resource);
+       }
+       #endif
+
+       #if !NET35
+       [Test]
+       public async System.Threading.Tasks.Task TestAwsResourceUpdateAsync()
+       {
+           var twilioRestClient = Substitute.For<ITwilioRestClient>();
+           string testResponse = "{\"account_sid\":\"" + ACCOUNT_SID + "\",\"test_string\":\"hello\" }";
+           twilioRestClient.RequestAsync(Arg.Any<Request>()).Returns(new Response(System.Net.HttpStatusCode.OK, testResponse));
+           AwsResource aws = await AwsResource.UpdateAsync(ACCOUNT_SID, client: twilioRestClient);
+           Assert.IsNotNull(aws);
+           Assert.IsNotNull(aws.TestString);
+           Assert.AreEqual("hello", aws.TestString);
+       }
+       #endif
+
+       #if !NET35
+       [Test]
+       public async System.Threading.Tasks.Task TestShouldAddAccountSidIfNotPresentAsync()
+       {
+           var twilioRestClient = Substitute.For<ITwilioRestClient>();
+           twilioRestClient.AccountSid.Returns(ACCOUNT_SID);
+           Request request = new Request(
+                   HttpMethod.Get,
+                   Twilio.Rest.Domain.Api,
+                   "/2010-04-01/Accounts/AC222222222222222222222222222222/Calls/123.json"
+           );
+           twilioRestClient.RequestAsync(request).Returns(new Response(System.Net.HttpStatusCode.OK, "{\"account_sid\":\"AC222222222222222222222222222222\",\"call_sid\":\"PNXXXXY\", \"sid\":123, \"test_object\":{\"mms\": true, \"sms\":false, \"voice\": false, \"fax\":true}}"));
+           CallResource call = await CallResource.FetchAsync(123,client:twilioRestClient);
+           Assert.IsNotNull(call);
+           Assert.AreEqual("123", call.Sid);
+           Assert.AreEqual(ACCOUNT_SID, call.AccountSid);
+       }
+       #endif
+
+       #if !NET35
+       [Test]
+       public async System.Threading.Tasks.Task TestFeedbackCallSummaryObjectCreationResponseValidAsync()
+       {
+           var twilioRestClient = Substitute.For<ITwilioRestClient>();
+           DateTime startDate = DateTime.Parse("2009-01-27");
+           DateTime endDate = DateTime.Parse("2022-01-27");
+           twilioRestClient.AccountSid.Returns("sid");
+           twilioRestClient.RequestAsync(Arg.Any<Request>()).Returns(new Response(System.Net.HttpStatusCode.OK, "{ \"account_sid\":\"AXCCCCC1234567891234567\",\"sid\":\"123\"}"));
+           FeedbackCallSummaryResource feedbackSummary = await FeedbackCallSummaryResource.CreateAsync(startDate, endDate,pathAccountSid:ACCOUNT_SID,client:twilioRestClient);
+           Assert.IsNotNull(feedbackSummary);
+       }
+       #endif
+
+
 
 
 
