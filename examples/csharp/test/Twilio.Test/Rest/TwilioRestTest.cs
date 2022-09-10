@@ -635,7 +635,7 @@ namespace Twilio.Test.Rest
             NewCredentialsResource credentials = NewCredentialsResource.Create("AC222222222222222222222222222222", testInteger:1, testNumberFloat:1.4F,testAnyType:anyMap, client: twilioRestClient);
 
             Assert.IsNotNull(credentials);
-            Console.WriteLine(request.PostParams);
+            //Console.WriteLine(request.PostParams);
 
             Assert.AreEqual("AC222222222222222222222222222222", request.PostParams.Single(kvp => kvp.Key == "TestString").Value);
             Assert.AreEqual("{\"TestInteger\":1}", request.PostParams.Single(kvp => kvp.Key == "TestAnyType").Value);
