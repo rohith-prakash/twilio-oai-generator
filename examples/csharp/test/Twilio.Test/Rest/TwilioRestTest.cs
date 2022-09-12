@@ -715,6 +715,307 @@ namespace Twilio.Test.Rest
             Assert.AreEqual("{\"TestInteger\":1}", request.PostParams.Single(kvp => kvp.Key == "TestAnyType").Value);
         }
         #endif
+
+        [Test]
+        public void TestDeleteAwsOptionsCreation()
+        {
+            var deleteAwsOptions = new DeleteAwsOptions(pathSid: "PATHSID");
+            Assert.IsNotNull(deleteAwsOptions);
+            Assert.IsNotNull(deleteAwsOptions.PathSid);
+            Assert.AreEqual("PATHSID", deleteAwsOptions.PathSid);
+        }
+
+        [Test]
+        public void TestFetchAwsOptionsCreation()
+        {
+            var fetchAwsOptions = new FetchAwsOptions(pathSid: "PATHSID");
+            Assert.IsNotNull(fetchAwsOptions);
+            Assert.IsNotNull(fetchAwsOptions.PathSid);
+            Assert.AreEqual("PATHSID", fetchAwsOptions.PathSid);
+        }
+
+        [Test]
+        public void TestReadAwsOptionsCreation()
+        {
+            var readAwsOptions = new ReadAwsOptions() { PageSize = 3 };
+            Assert.IsNotNull(readAwsOptions);
+            Assert.IsNotNull(readAwsOptions.PageSize);
+            Assert.AreEqual(3, readAwsOptions.PageSize);
+            var param = readAwsOptions.GetParams();
+            Assert.IsNotNull(param);
+            Assert.AreEqual(3.ToString(), param.Single((x) => x.Key == "PageSize").Value);
+        }
+
+        [Test]
+        public void TestUpdateAwsOptionsCreation()
+        {
+            string pathSid = "PathSid";
+            bool testBoolean = true;
+            string testString = "TestString";
+            var updateAwsOptions = new UpdateAwsOptions(pathSid) { TestString = testString, TestBoolean = testBoolean };
+            Assert.IsNotNull(updateAwsOptions);
+            Assert.IsNotNull(updateAwsOptions.PathSid);
+            Assert.AreEqual(pathSid, updateAwsOptions.PathSid);
+            Assert.IsNotNull(updateAwsOptions.TestString);
+            Assert.AreEqual(testString, updateAwsOptions.TestString);
+            Assert.IsTrue(updateAwsOptions.TestBoolean);
+            var param = updateAwsOptions.GetParams();
+            Assert.IsNotNull(param);
+            Assert.AreEqual(testString, param.Single((x) => x.Key == "TestString").Value);
+            Assert.AreEqual(testBoolean.ToString().ToLower(), param.Single((x) => x.Key == "TestBoolean").Value);
+        }
+
+        [Test]
+        public void TestCreateCallOptionsCreation()
+        {
+            string requiredStringProperty = "RequiredStringProperty";
+            string pathAccountSid = "PathAccountSid";
+            List<string> testArrayOfStrings = new List<string>() { "testElement1", "testElement2" };
+
+            var createCall = new CreateCallOptions(requiredStringProperty: requiredStringProperty) {PathAccountSid = pathAccountSid,TestArrayOfStrings = testArrayOfStrings };
+            Assert.IsNotNull(createCall);
+            Assert.IsNotNull(createCall.PathAccountSid);
+            Assert.AreEqual(pathAccountSid, createCall.PathAccountSid);
+            Assert.IsNotNull(createCall.RequiredStringProperty);
+            Assert.AreEqual(requiredStringProperty, createCall.RequiredStringProperty);
+            Assert.IsNotNull(createCall.TestArrayOfStrings);
+            Assert.AreEqual(testArrayOfStrings, createCall.TestArrayOfStrings);
+
+        }
+
+        [Test]
+        public void TestCreateCallOptionsParamsCreation()
+        {
+            string requiredStringProperty = "RequiredStringProperty";
+            string pathAccountSid = "PathAccountSid";
+            List<string> testArrayOfStrings = new List<string>() { "testElement1", "testElement2" };
+
+            var createCall = new CreateCallOptions(requiredStringProperty: requiredStringProperty) { PathAccountSid = pathAccountSid, TestArrayOfStrings = testArrayOfStrings };
+            Assert.IsNotNull(createCall);
+
+            var param = createCall.GetParams();
+            Assert.IsNotNull(param);
+            Assert.AreEqual(requiredStringProperty,param.Single(x => x.Key == "RequiredStringProperty").Value);
+            List<string> testArrayOfStringsRetrieved = param.Where(x => x.Key == "TestArrayOfStrings").Select(x => x.Value).ToList();
+            CollectionAssert.AreEquivalent(testArrayOfStrings, testArrayOfStringsRetrieved);
+        }
+
+        [Test]
+        public void TestDeleteCallOptionsCreation()
+        {
+
+            string pathAccountSid = "PathAccountSid";
+            int pathTestInteger = 10;
+
+            var deleteCall = new DeleteCallOptions(pathTestInteger) { PathAccountSid = pathAccountSid};
+            Assert.IsNotNull(deleteCall);
+            Assert.IsNotNull(deleteCall.PathAccountSid);
+            Assert.AreEqual(pathAccountSid, deleteCall.PathAccountSid);
+            Assert.AreEqual(pathTestInteger, deleteCall.PathTestInteger);
+
+        }
+
+        [Test]
+        public void TestFetchCallOptionsCreation()
+        {
+
+            string pathAccountSid = "PathAccountSid";
+            int pathTestInteger = 10;
+
+            var fetchCall = new FetchCallOptions(pathTestInteger) { PathAccountSid = pathAccountSid};
+            Assert.IsNotNull(fetchCall);
+            Assert.IsNotNull(fetchCall.PathAccountSid);
+            Assert.AreEqual(pathAccountSid, fetchCall.PathAccountSid);
+            Assert.AreEqual(pathTestInteger, fetchCall.PathTestInteger);
+
+        }
+
+        [Test]
+        public void CreateFeedbackCallSummaryOptionsCreation()
+        {
+
+            string pathAccountSid = "PathAccountSid";
+            DateTime startDate = DateTime.Parse("2010-3-12");
+            DateTime endDate = DateTime.Parse("2011-5-12");
+
+            var createCall = new CreateFeedbackCallSummaryOptions(endDate,startDate) { PathAccountSid = pathAccountSid};
+            Assert.IsNotNull(createCall);
+            Assert.IsNotNull(createCall.PathAccountSid);
+            Assert.AreEqual(pathAccountSid, createCall.PathAccountSid);
+        }
+
+       [Test]
+       public void CreateFeedbackCallSummaryOptionsParamsCreation()
+       {
+
+           string pathAccountSid = "PathAccountSid";
+           DateTime startDate = DateTime.Parse("2010-3-12");
+           DateTime endDate = DateTime.Parse("2011-5-12");
+
+           var createCall = new CreateFeedbackCallSummaryOptions(endDate,startDate) { PathAccountSid = pathAccountSid};
+           Assert.IsNotNull(createCall);
+           var param = createCall.GetParams();
+           Assert.IsNotNull(param);
+           Assert.AreEqual(startDate.ToString("yyyy-MM-dd"), param.Single((x) => x.Key == "StartDate").Value);
+           Assert.AreEqual(endDate.ToString("yyyy-MM-dd"), param.Single((x) => x.Key == "EndDate").Value);
+       }
+
+       [Test]
+       public void CreateNewCredentialsOptionsCreation()
+       {
+
+           string testString = "testString";
+           bool testBoolean = true;
+           int testInteger = 5;
+           decimal testNumber = Decimal.Parse("5");
+           float testNumberFloat = 12.0F;
+           double testNumberDouble = 19.0;
+           decimal testNumberInt32 = Decimal.Parse("100");
+           long testNumberInt64 = 100L;
+           Dictionary<string, Object> testObject = new Dictionary<string, Object>();
+           testObject.Add("test1", DateTime.Parse("1999-12-01"));
+           testObject.Add("test2", DateTime.Now);
+           DateTime testDateTime = DateTime.Now;
+           DateTime testDate = DateTime.Parse("2011-5-12");
+           NewCredentialsResource.StatusEnum testEnum = NewCredentialsResource.StatusEnum.InProgress;
+           List<Dictionary<string, Object>> testObjectArray = new List<Dictionary<string, Object>>()
+           {
+               new Dictionary<string, object>(){{"key11","value11"},{"key12","value12"}},
+               new Dictionary<string, object>(){{"key21","value21"},{ "key22", "value22" }}
+           };
+
+
+
+           var permission1 = new NewCredentialsResource.PermissionsEnum();
+           permission1.FromString("START");
+           var permission2 = new NewCredentialsResource.PermissionsEnum();
+           permission2.FromString("NEXT");
+
+           List<NewCredentialsResource.PermissionsEnum> permissions = new List<NewCredentialsResource.PermissionsEnum>()
+           {
+               permission1,
+               permission2
+           };
+
+           var credentials = new CreateNewCredentialsOptions(testString) {
+               TestBoolean = testBoolean,
+               TestInteger = testInteger,
+               TestNumber = testNumber,
+               TestNumberFloat = testNumberFloat,
+               TestNumberDouble = testNumberDouble,
+               TestNumberInt32 = testNumberInt32,
+               TestNumberInt64 = testNumberInt64,
+               TestDate = testDate,
+               TestDateTime = testDateTime,
+               TestEnum = testEnum,
+               Permissions = permissions,
+               TestObject = testObject,
+               TestObjectArray = testObjectArray
+           };
+           Assert.IsNotNull(credentials);
+           Assert.IsNotNull(credentials.TestString);
+           Assert.IsNotNull(credentials.Permissions);
+           Assert.IsNotNull(credentials.TestObject);
+           Assert.IsNotNull(credentials.TestObjectArray);
+           Assert.AreEqual(testString, credentials.TestString);
+           Assert.IsTrue(credentials.TestBoolean);
+           Assert.AreEqual(testInteger,credentials.TestInteger);
+           Assert.AreEqual(testNumber, credentials.TestNumber);
+           Assert.AreEqual(testNumberFloat, credentials.TestNumberFloat);
+           Assert.AreEqual(testNumberDouble, credentials.TestNumberDouble);
+           Assert.AreEqual(testNumberInt32, credentials.TestNumberInt32);
+           Assert.AreEqual(testNumberInt64, credentials.TestNumberInt64);
+           Assert.AreEqual(testDate, credentials.TestDate);
+           Assert.AreEqual(testDateTime, credentials.TestDateTime);
+           Assert.AreEqual(testEnum,credentials.TestEnum);
+           CollectionAssert.AreEquivalent(permissions, credentials.Permissions);
+           CollectionAssert.AreEquivalent(testObject, credentials.TestObject);
+           CollectionAssert.AreEquivalent(testObjectArray, credentials.TestObjectArray);
+
+       }
+
+       [Test]
+        public void CreateNewCredentialsOptionsParamsCreation()
+        {
+
+            string testString = "testString";
+            bool testBoolean = true;
+            int testInteger = 5;
+            decimal testNumber = Decimal.Parse("5");
+            float testNumberFloat = 12.0F;
+            double testNumberDouble = 19.0;
+            decimal testNumberInt32 = Decimal.Parse("100");
+            long testNumberInt64 = 100L;
+            Dictionary<string, Object> testObject = new Dictionary<string, Object>();
+            testObject.Add("test1", DateTime.Parse("1999-12-01"));
+            testObject.Add("test2", DateTime.Now);
+            DateTime testDateTime = DateTime.Now;
+            DateTime testDate = DateTime.Parse("2011-5-12");
+            NewCredentialsResource.StatusEnum testEnum = NewCredentialsResource.StatusEnum.InProgress;
+            List<Dictionary<string, Object>> testObjectArray = new List<Dictionary<string, Object>>()
+            {
+                new Dictionary<string, object>(){{"key11","value11"},{"key12","value12"}},
+                new Dictionary<string, object>(){{"key21","value21"},{ "key22", "value22" }}
+            };
+
+
+
+            var permission1 = new NewCredentialsResource.PermissionsEnum();
+            permission1.FromString("START");
+            var permission2 = new NewCredentialsResource.PermissionsEnum();
+            permission2.FromString("NEXT");
+
+            List<NewCredentialsResource.PermissionsEnum> permissions = new List<NewCredentialsResource.PermissionsEnum>()
+            {
+                permission1,
+                permission2
+            };
+
+            var credentials = new CreateNewCredentialsOptions(testString) {
+                TestBoolean = testBoolean,
+                TestInteger = testInteger,
+                TestNumber = testNumber,
+                TestNumberFloat = testNumberFloat,
+                TestNumberDouble = testNumberDouble,
+                TestNumberInt32 = testNumberInt32,
+                TestNumberInt64 = testNumberInt64,
+                TestDate = testDate,
+                TestDateTime = testDateTime,
+                TestEnum = testEnum,
+                Permissions = permissions,
+                TestObject = testObject,
+                TestObjectArray = testObjectArray
+            };
+            Assert.IsNotNull(credentials);
+            var param = credentials.GetParams();
+            Assert.IsNotNull(param);
+            Assert.AreEqual(testString, param.Single((x) => x.Key == "TestString").Value);
+            Assert.AreEqual(testBoolean.ToString().ToLower(), param.Single((x) => x.Key == "TestBoolean").Value);
+            Assert.AreEqual(testInteger.ToString(), param.Single((x) => x.Key == "TestInteger").Value);
+            Assert.AreEqual(testNumber.ToString(), param.Single((x) => x.Key == "TestNumber").Value);
+            Assert.AreEqual(testNumberFloat.ToString(), param.Single((x) => x.Key == "TestNumberFloat").Value);
+            Assert.AreEqual(testNumberDouble.ToString(), param.Single((x) => x.Key == "TestNumberDouble").Value);
+            Assert.AreEqual(testNumberInt32.ToString(), param.Single((x) => x.Key == "TestNumberInt32").Value);
+            Assert.AreEqual(testNumberInt64.ToString(), param.Single((x) => x.Key == "TestNumberInt64").Value);
+            Assert.AreEqual(testDate.ToString("yyyy-MM-dd"), param.Single((x) => x.Key == "TestDate").Value);
+            Assert.AreEqual(Serializers.DateTimeIso8601(testDateTime), param.Single((x) => x.Key == "TestDateTime").Value);
+            Assert.AreEqual(testEnum.ToString(), param.Single((x) => x.Key == "TestEnum").Value);
+
+            var testObjectData = PrefixedCollapsibleMap.Serialize(testObject, "object");
+            var testObjectDataRetieved = param.Where((x) => x.Key.StartsWith("object."));
+            CollectionAssert.AreEquivalent(testObjectData, testObjectDataRetieved);
+
+            var permissionsString = permissions.Select(x => x.ToString());
+            var permissionsStringRetrieved = param.Where(x => x.Key == "Permissions").Select(x => x.Value);
+            CollectionAssert.AreEquivalent(permissionsString, permissionsStringRetrieved);
+
+            var testObjectArrayData = testObjectArray.Select(x => x.ToString());
+            var testObjectArrayDataRetrieved = param.Where(x => x.Key == "TestObjectArray").Select(x => x.Value);
+            CollectionAssert.AreEquivalent(testObjectArrayData, testObjectArrayDataRetrieved);
+
+        }
+
+
     }
 
 }
