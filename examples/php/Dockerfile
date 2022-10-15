@@ -9,6 +9,7 @@ ENV PATH="$PATH:/opt/sonar-scanner/bin"
 ENV XDEBUG_MODE=coverage
 RUN mkdir /sonar
 COPY sonar-script/ /sonar
+RUN chmod +x /sonar/sonar.sh
 RUN mkdir /app
 WORKDIR /app
 RUN git clone https://github.com/twilio/twilio-php.git
