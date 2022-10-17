@@ -4,6 +4,8 @@ RUN mkdir /sonar
 ADD sonar-script/sonar.sh /usr/local/bin/sonar.sh
 RUN chmod +x /usr/local/bin/sonar.sh
 ENV SONAR_TOKEN=$SONAR_TOKEN
+ENV PATH="$PATH:/opt/sonar-scanner/bin"
+ENV XDEBUG_MODE=coverage
 
 RUN apt-get update -y && apt-get install -y zip unzip wget nodejs
 RUN apt-get install -y git
