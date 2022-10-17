@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-for ARGUMENT in "$@"
-do
-   KEY=$(echo $ARGUMENT | cut -f1 -d=)
-
-   KEY_LENGTH=${#KEY}
-   VALUE="${ARGUMENT:$KEY_LENGTH+1}"
-
-   export "$KEY"="$VALUE"
-done
+#for ARGUMENT in "$@"
+#do
+#   KEY=$(echo $ARGUMENT | cut -f1 -d=)
+#
+#   KEY_LENGTH=${#KEY}
+#   VALUE="${ARGUMENT:$KEY_LENGTH+1}"
+#
+#   export "$KEY"="$VALUE"
+#done
 
 sonar-scanner -X  \
   -Dsonar.organization="rohith-prakash" \
