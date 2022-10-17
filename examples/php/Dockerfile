@@ -9,11 +9,10 @@ RUN apt-get update -y && apt-get install -y zip unzip wget nodejs
 RUN apt-get install -y git
 RUN wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873-linux.zip \
     && unzip  sonar-scanner-cli-4.2.0.1873-linux.zip \
-    && mv sonar-scanner-4.2.0.1873-linux /opt/sonar-scanner \
+    && mv sonar-scanner-4.2.0.1873-linux /opt/sonar-scanner
 
-RUN git clone https://github.com/twilio/twilio-php.git
-RUN mkdir /twilio-php
-WORKDIR /twilio-php
+RUN git clone https://github.com/twilio/twilio-php.git twilio
+WORKDIR /twilio
 
 ENV PATH="vendor/bin:$PATH"
 
