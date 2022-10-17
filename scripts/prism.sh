@@ -33,8 +33,8 @@ function check_status() {
   done
 }
 
-
-testing_services=("go-client-test" "java-test" "node-test" "csharp-test" "php-test")
+testing_services=("go-client-test" "java-test" "node-test"  "php-test")
+#testing_services=("go-client-test" "java-test" "node-test" "csharp-test" "php-test")
 #testing_services=("php-test")
 wait_for "${testing_services[@]}"
 check_status "${testing_services[@]}"
