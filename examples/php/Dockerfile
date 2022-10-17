@@ -12,6 +12,7 @@ RUN wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-s
     && mv sonar-scanner-4.2.0.1873-linux /opt/sonar-scanner \
 
 RUN git clone https://github.com/twilio/twilio-php.git twilio
+RUN mkdir /twilio
 WORKDIR /twilio
 
 ENV PATH="vendor/bin:$PATH"
