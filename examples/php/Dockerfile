@@ -1,37 +1,34 @@
 FROM php:7.4 AS build
 ARG SONAR_TOKEN=""
-RUN apt-get update -y && apt-get install -y git zip unzip wget nodejs
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
-#COPY --from=sonarsource/sonar-scanner-cli:latest . /opt/sonar-scanner
-RUN wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873-linux.zip \
-    && unzip  sonar-scanner-cli-4.2.0.1873-linux.zip \
-    && mv sonar-scanner-4.2.0.1873-linux /opt/sonar-scanner
-ENV PATH="$PATH:/opt/sonar-scanner/bin"
-ENV XDEBUG_MODE=coverage
-ENV SONAR_TOKEN=$SONAR_TOKEN
 RUN mkdir /sonar
-#COPY sonar-script/ /sonar
 ADD sonar-script/sonar.sh /usr/local/bin/sonar.sh
 RUN chmod +x /usr/local/bin/sonar.sh
-RUN mkdir /app
-WORKDIR /app
-RUN git clone https://github.com/twilio/twilio-php.git
-ENV PATH="vendor/bin:$PATH"
-WORKDIR /app/twilio-php
+ENV SONAR_TOKEN=$SONAR_TOKEN
 
-RUN rm -rf src/Twilio/Rest/*
+RUN apt-get update -y && apt-get install -y zip unzip wget nodejs
+RUN apt-get install -y git
+RUN wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.2.0.1873-linux.zip \
+    && unzip  sonar-scanner-cli-4.2.0.1873-linux.zip \
+    && mv sonar-scanner-4.2.0.1873-linux /opt/sonar-scanner \
+
+RUN git clone https://github.com/twilio/twilio-php.git twilio
+WORKDIR /twilio
+
+ENV PATH="vendor/bin:$PATH"
+
+RUN rm -rf src/Twilio/Rest/*/
 COPY src/Twilio/Rest src/Twilio/Rest
 
-RUN rm -rf tests/Twilio/*/
-COPY unit-tests integration-tests tests/Twilio/
+RUN rm -rf tests/Twilio/Integration/
+COPY tests/Twilio/Integration tests/Twilio/Integration
 
-RUN composer install
+RUN rm -rf tests/Twilio/Unit/Rest
+COPY tests/Twilio/Unit/Rest tests/Twilio/Unit/Rest
+
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+RUN composer install --prefer-dist
+
 RUN pecl install xdebug
 RUN pecl install pcov && docker-php-ext-enable pcov
 
-#CMD  ["/bin/bash", "-c", "echo \"This is sonar token\";echo $SONAR_TOKEN;echo \"This is new message\""]
-#CMD  ["/bin/bash", "-c", "ls /opt/sonar-scanner"]
-
-CMD ["/bin/bash", "-c", "set -o pipefail &&  phpunit -d memory_limit=512M --strict-coverage --disallow-test-output --colors --configuration tests/phpunit.xml --coverage-clover=php_coverage.xml  --log-junit=execution-result.xml 2>&1 | tee /local/test-report.out && cp php_coverage.xml  execution-result.xml /local ; /bin/bash /usr/local/bin/sonar.sh "]
-
-#RUN if [ "$SONAR_TOKEN" = "" ] ; then echo Skipping sonar analysis ;  else make cover PROJECT_NAME=rohith-prakash_openapi-generator-php SONAR_SOURCES="/d:sonar.sources=src/Twilio/Rest/**/*.* /d:sonar.tests=tests/Twilio/**/*.*" ; fi
+CMD ["/bin/bash", "-c", "phpunit -d memory_limit=512M --disallow-test-output --colors --configuration tests/phpunit.xml --coverage-clover=php_coverage.xml  --log-junit=execution-result.xml 2>&1 | tee /local/test-report.out && cp php_coverage.xml  execution-result.xml /local ; /bin/bash /usr/local/bin/sonar.sh "]
