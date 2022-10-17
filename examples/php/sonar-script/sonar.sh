@@ -16,7 +16,7 @@ sonar-scanner -X  \
   -Dsonar.sources="src" \
   -Dsonar.tests="tests" \
   -Dsonar.host.url="https://sonarcloud.io" \
-  -Dsonar.login="${SONAR_TOKEN}" \
+  -Dsonar.login=$SONAR_TOKEN \
   -Dsonar.language="php" \
   -Dsonar.php.tests.reportPath="execution-result.xml" \
   -Dsonar.php.coverage.reportPaths="php_coverage.xml"
