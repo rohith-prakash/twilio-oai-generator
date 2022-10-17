@@ -9,12 +9,13 @@
 #   export "$KEY"="$VALUE"
 #done
 
-sonar-scanner  \
-  -Dsonar.organization=rohith-prakash \
-  -Dsonar.projectKey=rohith-prakash_openapi-generator-php \
-  -Dsonar.sources=src/Twilio/Rest/**/*.* \
-  -Dsonar.tests=tests/Twilio/**/*.* \
-  -Dsonar.host.url=https://sonarcloud.io \
+sonar-scanner -X  \
+  -Dsonar.organization="rohith-prakash" \
+  -Dsonar.projectKey="rohith-prakash_openapi-generator-php" \
+  -Dsonar.projectName="rohith-prakash_openapi-generator-php" \
+  -Dsonar.sources="src" \
+  -Dsonar.tests="tests" \
+  -Dsonar.host.url="https://sonarcloud.io" \
   -Dsonar.login="${SONAR_TOKEN}" \
   -Dsonar.language="php" \
   -Dsonar.php.tests.reportPath="execution-result.xml" \
