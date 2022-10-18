@@ -12,6 +12,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo: [ examples/php ]
     timeout-minutes: 20
     env:
       DOCKER_LOGIN: ${{ secrets.DOCKER_USERNAME && secrets.DOCKER_AUTH_TOKEN }}
@@ -61,11 +64,8 @@ jobs:
       - name: Install SonarCloud scanner and run analysis  Mono repo
         uses: SonarSource/sonarcloud-github-action@master
         if: (github.event_name == 'pull_request' || github.ref_type == 'branch') && !github.event.pull_request.head.repo.fork
-        strategy:
-          matrix:
-            directories: [examples/php]
         with:
-          projectBaseDir: ${{ matrix.directories }}
+          projectBaseDir: ${{ matrix.repo }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
