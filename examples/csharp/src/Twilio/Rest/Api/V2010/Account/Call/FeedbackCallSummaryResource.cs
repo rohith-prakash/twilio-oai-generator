@@ -46,15 +46,11 @@ namespace Twilio.Rest.Api.V2010.Account.Call
             public static readonly StatusEnum Absent = new StatusEnum("absent");
         }
 
-
-
-
-
         
         private static Request BuildUpdateRequest(UpdateFeedbackCallSummaryOptions options, ITwilioRestClient client)
         {
             
-            string path = "/2010-04-01/Accounts/{AccountSid}/Calls/FeedbackSummary/{Sid}.json";
+            string path = "/2010-04-01/Accounts/{AccountSid}/Calls/Feedback/Summary/{Sid}.json";
 
             string PathAccountSid = options.PathAccountSid ?? client.AccountSid;
             path = path.Replace("{"+"AccountSid"+"}", PathAccountSid);
@@ -97,10 +93,11 @@ namespace Twilio.Rest.Api.V2010.Account.Call
         #endif
 
         /// <summary> update </summary>
-                /// <param name="pathSid">  </param>
+        /// <param name="pathSid">  </param>
         /// <param name="endDate">  </param>
         /// <param name="startDate">  </param>
         /// <param name="pathAccountSid">  </param>
+        /// <param name="accountSid">  </param>
         /// <param name="client"> Client to make requests to Twilio </param>
         /// <returns> A single instance of FeedbackCallSummary </returns>
         public static FeedbackCallSummaryResource Update(
@@ -108,18 +105,20 @@ namespace Twilio.Rest.Api.V2010.Account.Call
                                           DateTime? endDate,
                                           DateTime? startDate,
                                           string pathAccountSid = null,
+                                          string accountSid = null,
                                           ITwilioRestClient client = null)
         {
-            var options = new UpdateFeedbackCallSummaryOptions(pathSid, endDate, startDate){ PathAccountSid = pathAccountSid };
+            var options = new UpdateFeedbackCallSummaryOptions(pathSid, endDate, startDate){ PathAccountSid = pathAccountSid, AccountSid = accountSid };
             return Update(options, client);
         }
 
         #if !NET35
         /// <summary> update </summary>
-                /// <param name="pathSid">  </param>
+        /// <param name="pathSid">  </param>
         /// <param name="endDate">  </param>
         /// <param name="startDate">  </param>
         /// <param name="pathAccountSid">  </param>
+        /// <param name="accountSid">  </param>
         /// <param name="client"> Client to make requests to Twilio </param>
         /// <returns> Task that resolves to A single instance of FeedbackCallSummary </returns>
         public static async System.Threading.Tasks.Task<FeedbackCallSummaryResource> UpdateAsync(
@@ -127,60 +126,14 @@ namespace Twilio.Rest.Api.V2010.Account.Call
                                                                               DateTime? endDate,
                                                                               DateTime? startDate,
                                                                               string pathAccountSid = null,
+                                                                              string accountSid = null,
                                                                               ITwilioRestClient client = null)
         {
-            var options = new UpdateFeedbackCallSummaryOptions(pathSid, endDate, startDate){ PathAccountSid = pathAccountSid };
+            var options = new UpdateFeedbackCallSummaryOptions(pathSid, endDate, startDate){ PathAccountSid = pathAccountSid, AccountSid = accountSid };
             return await UpdateAsync(options, client);
         }
         #endif
     
-        /// <summary> Fetch the target page of records </summary>
-        /// <param name="targetUrl"> API-generated URL for the requested results page </param>
-        /// <param name="client"> Client to make requests to Twilio </param>
-        /// <returns> The target page of records </returns>
-        public static Page<FeedbackCallSummaryResource> GetPage(string targetUrl, ITwilioRestClient client)
-        {
-            client = client ?? TwilioClient.GetRestClient();
-
-            var request = new Request(
-                HttpMethod.Get,
-                targetUrl
-            );
-
-            var response = client.Request(request);
-            return Page<FeedbackCallSummaryResource>.FromJson("", response.Content);
-        }
-
-        /// <summary> Fetch the next page of records </summary>
-        /// <param name="page"> current page of records </param>
-        /// <param name="client"> Client to make requests to Twilio </param>
-        /// <returns> The next page of records </returns>
-        public static Page<FeedbackCallSummaryResource> NextPage(Page<FeedbackCallSummaryResource> page, ITwilioRestClient client)
-        {
-            var request = new Request(
-                HttpMethod.Get,
-                page.GetNextPageUrl(Rest.Domain.Api)
-            );
-
-            var response = client.Request(request);
-            return Page<FeedbackCallSummaryResource>.FromJson("", response.Content);
-        }
-
-        /// <summary> Fetch the previous page of records </summary>
-        /// <param name="page"> current page of records </param>
-        /// <param name="client"> Client to make requests to Twilio </param>
-        /// <returns> The previous page of records </returns>
-        public static Page<FeedbackCallSummaryResource> PreviousPage(Page<FeedbackCallSummaryResource> page, ITwilioRestClient client)
-        {
-            var request = new Request(
-                HttpMethod.Get,
-                page.GetPreviousPageUrl(Rest.Domain.Api)
-            );
-
-            var response = client.Request(request);
-            return Page<FeedbackCallSummaryResource>.FromJson("", response.Content);
-        }
-
         /// <summary>
         /// Converts a JSON string into a FeedbackCallSummaryResource object
         /// </summary>
@@ -197,7 +150,6 @@ namespace Twilio.Rest.Api.V2010.Account.Call
                 throw new ApiException(e.Message, e);
             }
         }
-
 
     
         ///<summary> The account_sid </summary> 

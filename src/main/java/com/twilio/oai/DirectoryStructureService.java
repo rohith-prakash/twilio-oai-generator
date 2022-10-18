@@ -25,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 import org.openapitools.codegen.CodegenOperation;
 import org.openapitools.codegen.model.OperationMap;
 import org.openapitools.codegen.model.OperationsMap;
-import org.openapitools.codegen.utils.StringUtils;
 
 import static com.twilio.oai.common.ApplicationConstants.ACCOUNT_SID_FORMAT;
 import static com.twilio.oai.common.ApplicationConstants.PATH_SEPARATOR_PLACEHOLDER;
@@ -72,7 +71,7 @@ public class DirectoryStructureService {
                 operation.addTagsItem(tag);
 
                 if (!tag.contains(PATH_SEPARATOR_PLACEHOLDER)) {
-                    addDependent(versionResources, name);
+                    addDependent(versionResources, name, operation);
                 }
             });
         });
@@ -94,19 +93,22 @@ public class DirectoryStructureService {
             });
     }
 
-    public void addDependent(final Map<String, Object> resourcesMap, final String path) {
-        final Resource.ClassName className = getResourceClassName(path);
+    public void addDependent(final Map<String, Object> resourcesMap, final String path, final Operation operation) {
+        final Resource.Aliases resourceAliases = getResourceAliases(path, operation);
         final DependentResource dependent = new DependentResource.DependentResourceBuilder()
             .version(PathUtils.getFirstPathPart(path))
-            .name(className.getName())
-            .mountName(StringUtils.underscore(className.getMountName()))
-            .filename(caseResolver.filenameOperation(className.getName()))
+            .name(resourceAliases.getClassName())
+            .mountName(caseResolver.pathOperation(resourceAliases.getMountName()))
+            .filename(caseResolver.filenameOperation(resourceAliases.getClassName()))
             .build();
-        resourcesMap.put(className.getName(), dependent);
+        resourcesMap.put(resourceAliases.getClassName(), dependent);
     }
 
-    public Resource.ClassName getResourceClassName(final String path) {
-        return resourceTree.findResource(path).map(Resource::getClassName).orElseThrow();
+    private Resource.Aliases getResourceAliases(final String path, final Operation operation) {
+        return resourceTree
+            .findResource(path)
+            .map(resource -> operation == null ? resource.getResourceAliases() : resource.getResourceAliases(operation))
+            .orElseThrow();
     }
 
     public Optional<String> getApiVersionClass() {
@@ -124,10 +126,13 @@ public class DirectoryStructureService {
 
         additionalProperties.put("version", version);
         additionalProperties.put("apiVersionPath", getRelativeRoot(firstOperation.baseName));
+        additionalProperties.put("apiFilename",
+                                 caseResolver.pathOperation(getResourceAliases(firstOperation.path,
+                                                                               null).getClassName()));
 
         if (isVersionLess) {
             additionalProperties.put("apiVersion", caseResolver.productOperation(version));
-            additionalProperties.put("apiVersionClass", StringUtils.camelize(version));
+            additionalProperties.put("apiVersionClass", StringHelper.camelize(version));
         }
 
         final List<Object> versionResources = PathUtils

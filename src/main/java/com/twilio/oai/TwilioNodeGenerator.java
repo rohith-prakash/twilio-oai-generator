@@ -19,7 +19,6 @@ import org.openapitools.codegen.languages.TypeScriptNodeClientCodegen;
 import org.openapitools.codegen.model.ModelMap;
 import org.openapitools.codegen.model.ModelsMap;
 import org.openapitools.codegen.model.OperationsMap;
-import org.openapitools.codegen.utils.StringUtils;
 
 import static com.twilio.oai.common.ApplicationConstants.PATH_SEPARATOR_PLACEHOLDER;
 
@@ -53,7 +52,7 @@ public class TwilioNodeGenerator extends TypeScriptNodeClientCodegen {
     @Override
     public void processOpenAPI(final OpenAPI openAPI) {
         final String domain = twilioCodegen.getDomainFromOpenAPI(openAPI);
-        twilioCodegen.setDomain(StringUtils.camelize(domain, true));
+        twilioCodegen.setDomain(StringHelper.camelize(domain, true));
 
         openAPI.getPaths().forEach(resourceTree::addResource);
         resourceTree.getResources().forEach(resource -> resource.updateFamily(openAPI, resourceTree));
@@ -182,8 +181,15 @@ public class TwilioNodeGenerator extends TypeScriptNodeClientCodegen {
                 addModel(resource, co.bodyParam.dataType);
             }
 
-            final Map<String, Object> dependents = PathUtils.getStringMap(resource, "dependents");
-            resourceTree.dependents(co.path).forEach(path -> directoryStructureService.addDependent(dependents, path));
+            final Map<String, Object> dependentMap = PathUtils.getStringMap(resource, "dependents");
+            resourceTree
+                .dependents(co.path)
+                .forEach(dependent -> dependent
+                    .getPathItem()
+                    .readOperations()
+                    .forEach(operation -> directoryStructureService.addDependent(dependentMap,
+                                                                                 dependent.getName(),
+                                                                                 operation)));
 
             if (isInstanceOperation || (!hasInstanceOperations && httpMethod == HttpMethod.POST)) {
                 co.responses
@@ -207,8 +213,6 @@ public class TwilioNodeGenerator extends TypeScriptNodeClientCodegen {
                             });
                     });
             }
-
-            results.put("apiFilename", StringUtils.camelize(directoryStructureService.getResourceClassName(co.path).getName(), true));
         }
 
         resources.values().stream().map(resource -> (Map<String, Object>) resource).forEach(resource -> {

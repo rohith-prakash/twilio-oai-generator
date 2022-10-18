@@ -3,13 +3,32 @@ import nock from "nock";
 import Twilio from "../../lib/rest/Twilio";
 
 describe("credential", () => {
-  const twilio = new Twilio();
+  const accountSid: string = "AC12345678123456781234567812345678";
+  const authToken: string = "CR12345678123456781234567812345678";
+  const twilio = new Twilio(accountSid, authToken);
+
+  afterAll(() => {
+    nock.cleanAll();
+  });
+
+  it("should create a new set of credentials", () => {
+    const scope = nock("http://flex-api.twilio.com")
+      .post("/v1/Credentials/AWS")
+      .query({
+        TestString: "I'm New Here",
+      })
+      .reply(201, { sid: "123" });
+
+    return twilio.flexApi.v1.credentials.newCredentials
+      .create({ testString: "I'm New Here" })
+      .then(() => scope.done());
+  });
 
   it("should update an aws credential", () => {
-    const scope = nock("https://flex-api.twilio.com")
+    const scope = nock("http://flex-api.twilio.com")
       .post("/v1/Credentials/AWS/123")
       .reply(200, { sid: "123" });
 
-    return twilio.flexApi.v1.credential.aws("123").update(() => scope.done());
+    return twilio.flexApi.v1.credentials.aws("123").update(() => scope.done());
   });
 });
