@@ -58,11 +58,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Install SonarCloud scanner and run analysis for Php mono repo
+      - name: Install SonarCloud scanner and run analysis  Mono repo
         uses: SonarSource/sonarcloud-github-action@master
         if: (github.event_name == 'pull_request' || github.ref_type == 'branch') && !github.event.pull_request.head.repo.fork
+        strategy:
+          matrix:
+            directories: [examples/php]
         with:
-          projectBaseDir: examples/php
+          projectBaseDir: ${{ matrix.directories }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
