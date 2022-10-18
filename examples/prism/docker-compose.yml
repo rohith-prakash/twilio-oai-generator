@@ -29,6 +29,15 @@ services:
       - prism_api_v2010
       - prism_flex_v1
       - prism_versionless
+  php-test:
+    build:
+      context: ../php
+    volumes:
+      - ../php:/local
+    depends_on:
+      - prism_api_v2010
+      - prism_flex_v1
+      - prism_versionless
 
   node-test:
     build:

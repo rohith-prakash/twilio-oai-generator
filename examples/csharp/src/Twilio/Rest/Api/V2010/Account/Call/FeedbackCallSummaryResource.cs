@@ -46,15 +46,11 @@ namespace Twilio.Rest.Api.V2010.Account.Call
             public static readonly StatusEnum Absent = new StatusEnum("absent");
         }
 
-
-
-
-
         
         private static Request BuildUpdateRequest(UpdateFeedbackCallSummaryOptions options, ITwilioRestClient client)
         {
             
-            string path = "/2010-04-01/Accounts/{AccountSid}/Calls/FeedbackSummary/{Sid}.json";
+            string path = "/2010-04-01/Accounts/{AccountSid}/Calls/Feedback/Summary/{Sid}.json";
 
             string PathAccountSid = options.PathAccountSid ?? client.AccountSid;
             path = path.Replace("{"+"AccountSid"+"}", PathAccountSid);
@@ -97,10 +93,11 @@ namespace Twilio.Rest.Api.V2010.Account.Call
         #endif
 
         /// <summary> update </summary>
-                /// <param name="pathSid">  </param>
+        /// <param name="pathSid">  </param>
         /// <param name="endDate">  </param>
         /// <param name="startDate">  </param>
         /// <param name="pathAccountSid">  </param>
+        /// <param name="accountSid">  </param>
         /// <param name="client"> Client to make requests to Twilio </param>
         /// <returns> A single instance of FeedbackCallSummary </returns>
         public static FeedbackCallSummaryResource Update(
@@ -108,18 +105,20 @@ namespace Twilio.Rest.Api.V2010.Account.Call
                                           DateTime? endDate,
                                           DateTime? startDate,
                                           string pathAccountSid = null,
+                                          string accountSid = null,
                                           ITwilioRestClient client = null)
         {
-            var options = new UpdateFeedbackCallSummaryOptions(pathSid, endDate, startDate){ PathAccountSid = pathAccountSid };
+            var options = new UpdateFeedbackCallSummaryOptions(pathSid, endDate, startDate){ PathAccountSid = pathAccountSid, AccountSid = accountSid };
             return Update(options, client);
         }
 
         #if !NET35
         /// <summary> update </summary>
-                /// <param name="pathSid">  </param>
+        /// <param name="pathSid">  </param>
         /// <param name="endDate">  </param>
         /// <param name="startDate">  </param>
         /// <param name="pathAccountSid">  </param>
+        /// <param name="accountSid">  </param>
         /// <param name="client"> Client to make requests to Twilio </param>
         /// <returns> Task that resolves to A single instance of FeedbackCallSummary </returns>
         public static async System.Threading.Tasks.Task<FeedbackCallSummaryResource> UpdateAsync(
@@ -127,9 +126,10 @@ namespace Twilio.Rest.Api.V2010.Account.Call
                                                                               DateTime? endDate,
                                                                               DateTime? startDate,
                                                                               string pathAccountSid = null,
+                                                                              string accountSid = null,
                                                                               ITwilioRestClient client = null)
         {
-            var options = new UpdateFeedbackCallSummaryOptions(pathSid, endDate, startDate){ PathAccountSid = pathAccountSid };
+            var options = new UpdateFeedbackCallSummaryOptions(pathSid, endDate, startDate){ PathAccountSid = pathAccountSid, AccountSid = accountSid };
             return await UpdateAsync(options, client);
         }
         #endif

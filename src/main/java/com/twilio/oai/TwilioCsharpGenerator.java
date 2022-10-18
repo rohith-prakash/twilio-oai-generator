@@ -243,8 +243,11 @@ public class TwilioCsharpGenerator extends CSharpClientCodegen {
         co.requiredParams.forEach(parameter -> requestBodyArgument.put(parameter.paramName, parameter));
         co.pathParams.forEach(parameter -> requestBodyArgument.put(parameter.paramName, parameter));
         conditionalParameters.forEach(parameter -> requestBodyArgument.put(parameter.paramName, parameter));
-        optionalParameters.forEach(parameter -> requestBodyArgument.put(parameter.paramName, parameter));
-
+        co.formParams.forEach(parameter -> requestBodyArgument.put(parameter.paramName, parameter));
+        co.headerParams.forEach(parameter -> requestBodyArgument.put(parameter.paramName, parameter));
+        if (co.operationId.startsWith("List") || co.operationId.startsWith("Fetch")) {
+            optionalParameters.forEach(parameter -> requestBodyArgument.put(parameter.paramName, parameter));
+        }
         co.vendorExtensions.put("x-request-body-param", new ArrayList<>(requestBodyArgument.values()));
     }
 
@@ -299,10 +302,18 @@ public class TwilioCsharpGenerator extends CSharpClientCodegen {
         return new LinkedList<>(distinctResponseModels);
     }
 
+    public void postProcessParameter(CodegenParameter parameter) {
+        super.postProcessParameter(parameter);
+        if (parameter.isPathParam) {
+            parameter.paramName = "Path" + parameter.paramName;
+        }
+    }
+
     private void resolveCodeOperationParams(final CodegenOperation co, List<CodegenOperation> opList, OperationsMap results, List<CodegenModel> responseModels) {
         resolver.resolve(co.pathParams);
         resolver.resolve(co.queryParams);
         resolver.resolve(co.optionalParams);
+        resolver.resolve(co.formParams);
         resolver.resolve(co.requiredParams);
         resolver.resolve(co.allParams);
         resolver.resolve(co.headerParams);

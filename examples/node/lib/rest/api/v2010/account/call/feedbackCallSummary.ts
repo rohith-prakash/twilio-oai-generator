@@ -24,10 +24,12 @@ const serialize = require("../../../../../base/serialize");
  *
  * @property { string } endDate
  * @property { string } startDate
+ * @property { string } [accountSid2]
  */
 export interface FeedbackCallSummaryContextUpdateOptions {
   endDate: string;
   startDate: string;
+  accountSid2?: string;
 }
 
 export interface FeedbackCallSummaryListInstance {
@@ -64,7 +66,7 @@ export function FeedbackCallSummaryListInstance(
 
   instance._version = version;
   instance._solution = { accountSid };
-  instance._uri = `/Accounts/${accountSid}/Calls/FeedbackSummary.json`;
+  instance._uri = `/Accounts/${accountSid}/Calls/Feedback/Summary.json`;
 
   instance.toJSON = function toJSON() {
     return this._solution;
@@ -110,7 +112,7 @@ export class FeedbackCallSummaryContextImpl
 
   constructor(protected _version: V2010, accountSid: string, sid: string) {
     this._solution = { accountSid, sid };
-    this._uri = `/Accounts/${accountSid}/Calls/FeedbackSummary/${sid}.json`;
+    this._uri = `/Accounts/${accountSid}/Calls/Feedback/Summary/${sid}.json`;
   }
 
   update(params: any, callback?: any): Promise<FeedbackCallSummaryInstance> {
@@ -128,6 +130,8 @@ export class FeedbackCallSummaryContextImpl
 
     const data: any = {};
 
+    if (params.accountSid2 !== undefined)
+      data["AccountSid"] = params.accountSid2;
     data["EndDate"] = serialize.iso8601Date(params.endDate);
     data["StartDate"] = serialize.iso8601Date(params.startDate);
 
