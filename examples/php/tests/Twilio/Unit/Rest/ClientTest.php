@@ -257,4 +257,8 @@ class ClientTest extends UnitTest {
         $this->assertEquals($userAgentExtensions,$expectedExtensions);
     }
 
+    public function testForTestingSOnar(): void {
+            $this->assertEquals(1,1);
+        }
+
 }
