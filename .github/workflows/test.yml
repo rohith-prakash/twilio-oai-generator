@@ -54,8 +54,8 @@ jobs:
         if: (github.event_name == 'pull_request' || github.ref_type == 'branch') #&& !github.event.pull_request.head.repo.fork
         with:
           projectBaseDir: examples
-        args: >
-          -Dsonar.verbose=true
+          args: >
+            -Dsonar.verbose=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
