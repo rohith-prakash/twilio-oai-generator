@@ -61,7 +61,7 @@ jobs:
           projectBaseDir: examples
           args: >
             -Dsonar.verbose=true
-            -Dsonar.pullrequest.branch=eng:${{ steps.extract_branch.outputs.branch }}
+            -Dsonar.log.level=DEBUG
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -70,8 +70,6 @@ jobs:
         if: (github.event_name == 'pull_request' || github.ref_type == 'branch') #&& !github.event.pull_request.head.repo.fork
         with:
           projectBaseDir: examples/php
-          args: >
-            -Dsonar.pullrequest.branch=eng:${{ steps.extract_branch.outputs.branch }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
