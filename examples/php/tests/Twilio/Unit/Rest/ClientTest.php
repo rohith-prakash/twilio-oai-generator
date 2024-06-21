@@ -261,4 +261,8 @@ class ClientTest extends UnitTest {
             $this->assertEquals(1,1);
         }
 
+    public function newTestTestEquals(): void {
+                $this->assertEquals(1,1);
+    }
+
 }
